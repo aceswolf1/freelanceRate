@@ -1,0 +1,25 @@
+# Build context hygiene: never ship host artifacts or secrets into the image.
+node_modules
+.nuxt
+.output
+.data
+dist
+coverage
+*.log
+npm-debug.log*
+
+# Local env files — the image gets configuration from Compose `environment:`.
+.env
+.env.*
+!.env.example
+
+# Test / E2E artifacts
+tests/e2e
+playwright-report
+test-results
+blob-report
+
+# Editor / OS noise
+.vscode
+.idea
+.DS_Store

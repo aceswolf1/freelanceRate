@@ -1,0 +1,54 @@
+# --- Dependencies ----------------------------------------------------------
+node_modules/
+.pnp
+.pnp.js
+
+# --- Build output ----------------------------------------------------------
+dist/
+build/
+.output/
+.nuxt/
+.nitro/
+.cache/
+*.tsbuildinfo
+
+# --- Environment / secrets -------------------------------------------------
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- Tests & coverage ------------------------------------------------------
+coverage/
+.nyc_output/
+*.lcov
+
+# --- Playwright / E2E artifacts -------------------------------------------
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+e2e/screenshots/
+e2e/videos/
+e2e/traces/
+
+# --- Logs ------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# --- Editors / OS ----------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# --- Docker (keep the definitions, drop local state) -----------------------
+docker-data/
+*.tar
+# --- Claude Code local config (machine-specific; keep the design references) ---
+.claude/settings.json
+.claude/settings.local.json

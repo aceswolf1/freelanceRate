@@ -1,0 +1,31 @@
+# Nuxt / Nitro build output
+.nuxt/
+.output/
+.nitro/
+.cache/
+dist/
+
+# Dependencies
+node_modules/
+
+# Local env
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Test output
+coverage/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

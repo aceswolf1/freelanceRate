@@ -1,0 +1,19 @@
+# Build context hygiene: never ship host artifacts or secrets into the image.
+node_modules
+dist
+coverage
+*.log
+npm-debug.log*
+
+# Local env files — the image gets configuration from Compose `environment:`.
+.env
+.env.*
+!.env.example
+
+# Tests are not needed to run the server.
+tests
+
+# Editor / OS noise
+.vscode
+.idea
+.DS_Store

@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0e14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #232b3e;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #333f56;
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#0c0c0f",
+            "surface-container": "#131825",
+            "surface-container-high": "#171d2d",
+            "surface-container-low": "#0f131d",
+            "surface-container-lowest": "#0b0e14",
+            "border-subtle": "#232b3e",
+            "primary": "#a78bfa",
+            "primary-container": "#7c3aed",
+            "on-primary": "#0a0012",
+            "on-surface": "#f1f5f9",
+            "on-surface-variant": "#94a3b8",
+            "tertiary": "#34d399",
+            "error": "#ef4444",
+          },
+          fontFamily: {
+            sans: ["Geist", "sans-serif"],
+            mono: ["Geist Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#0b0e14] text-[#f1f5f9] font-sans antialiased min-h-screen flex selection:bg-purple-500/20 selection:text-purple-300">
+<!-- Left Sidenav (Persistent) -->
+<aside class="w-64 border-r border-[#232b3e] bg-[#0f131d] flex flex-col justify-between shrink-0 h-screen sticky top-0 z-40">
+<div class="flex flex-col">
+<!-- App Brand & Logo -->
+<div class="h-16 px-5 border-b border-[#232b3e] flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-900/30 font-bold">
+<span class="material-symbols-outlined text-lg">receipt_long</span>
+</div>
+<div class="flex flex-col">
+<span class="font-bold tracking-tight text-white text-base leading-none">BillFlow</span>
+<span class="text-[11px] font-mono text-[#94a3b8] mt-0.5">v2.4.1 • Pro</span>
+</div>
+</div>
+</div>
+<!-- Active Cycle Badge in Sidebar -->
+<div class="px-4 py-3 mx-3 my-3 bg-[#131825] border border-[#232b3e] rounded-xl flex items-center gap-2.5">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+<div class="flex flex-col">
+<span class="text-[11px] uppercase tracking-wider text-[#94a3b8] font-medium leading-none">Current Billing Cycle</span>
+<span class="text-xs font-medium text-[#f1f5f9] mt-1 font-mono">Oct 19 – Oct 25, 2026</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="px-3 flex flex-col gap-1 mt-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] transition-colors group" href="#">
+<span class="material-symbols-outlined text-xl text-[#94a3b8] group-hover:text-[#a78bfa] transition-colors">calendar_month</span>
+<span>Weekly Timesheet</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] transition-colors group" href="#">
+<span class="material-symbols-outlined text-xl text-[#94a3b8] group-hover:text-[#a78bfa] transition-colors">receipt</span>
+<span>Invoice Generator</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] transition-colors group" href="#">
+<span class="material-symbols-outlined text-xl text-[#94a3b8] group-hover:text-[#a78bfa] transition-colors">domain</span>
+<span>Clients</span>
+</a>
+<a aria-current="page" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium bg-[#171d2d] text-[#a78bfa] border border-[#232b3e] shadow-xs" href="#">
+<span class="material-symbols-outlined text-xl text-[#a78bfa]">folder_open</span>
+<span>Projects</span>
+<span class="ml-auto text-[11px] font-mono px-1.5 py-0.2 rounded bg-purple-950/60 border border-purple-800/40 text-purple-300">9</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] transition-colors group" href="#">
+<span class="material-symbols-outlined text-xl text-[#94a3b8] group-hover:text-[#a78bfa] transition-colors">tune</span>
+<span>Settings</span>
+</a>
+</nav>
+</div>
+<!-- Sidenav Bottom Profile -->
+<div class="p-3 border-t border-[#232b3e] bg-[#0b0e14]">
+<div class="flex items-center justify-between p-2 rounded-xl hover:bg-[#131825] transition-colors cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img alt="Alex Morgan" class="w-9 h-9 rounded-full object-cover ring-1 ring-[#232b3e]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDE87JTbH7uxeaO0BNQRhTTEJkmsCUpoOVIvWEYZP_PLxj0l1n93zIcwcR4ThAhgCE51x6i0NKm3e2zILRSO_G69XzwROOsGTf8E8Vlm6JHFXPI6J1S_SbcbzWIYkQr90j6i5HXZ6i7yPkjlh61JxWKLAmFTXEA5rRAxijZYakzveP8MaBf9iPgUp8XtHv6ymiqK1G8fhLydffQvYrhNkv56gcnpseM87oHSL73V9VmR142uyaFK_lN"/>
+<span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-[#0b0e14]"></span>
+</div>
+<div class="flex flex-col text-left leading-tight">
+<span class="text-sm font-medium text-[#f1f5f9] group-hover:text-[#a78bfa] transition-colors">Alex Morgan</span>
+<span class="text-xs text-[#94a3b8]">Senior Consultant</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[#94a3b8] text-lg group-hover:text-[#f1f5f9]">unfold_more</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Viewport -->
+<div class="flex-1 flex flex-col min-w-0 bg-[#0b0e14]">
+<!-- Content Area Top Bar -->
+<header class="h-16 border-b border-[#232b3e] bg-[#0f131d]/90 backdrop-blur-md px-8 flex items-center justify-between sticky top-0 z-30">
+<!-- Breadcrumbs / Left context -->
+<div class="flex items-center gap-2 text-sm text-[#94a3b8]">
+<span class="hover:text-[#f1f5f9] transition-colors">Workspace</span>
+<span class="text-[#232b3e]">/</span>
+<span class="text-[#f1f5f9] font-medium">Projects Directory</span>
+</div>
+<!-- Action items: Search, Notifications, Add Time -->
+<div class="flex items-center gap-3">
+<div class="relative w-64 hidden md:block">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[#94a3b8] text-lg">search</span>
+<input class="w-full h-8 pl-9 pr-3 bg-[#131825] border border-[#232b3e] rounded-lg text-xs text-[#f1f5f9] placeholder-[#94a3b8]/60 focus:outline-none focus:border-[#a78bfa] transition-colors" placeholder="Quick search..." type="text"/>
+</div>
+<button class="p-2 text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] rounded-lg border border-transparent hover:border-[#232b3e] transition-colors relative" type="button">
+<span class="material-symbols-outlined text-lg">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-purple-500 rounded-full ring-2 ring-[#0f131d]"></span>
+</button>
+<button class="inline-flex items-center gap-1.5 h-8 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold shadow-xs shadow-purple-900/30 transition-colors" type="button">
+<span class="material-symbols-outlined text-base">add</span>
+<span>Add Time</span>
+</button>
+</div>
+</header>
+<!-- Workspace Main Body -->
+<main class="p-8 flex flex-col gap-6">
+<!-- Header Title Section -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-1.5 text-[#94a3b8] text-xs font-mono uppercase tracking-wider mb-1">
+<span>Inventory &amp; Contracts</span>
+<span class="text-[#232b3e]">/</span>
+<span class="text-[#a78bfa] font-semibold">Ledger 2026.Q4</span>
+</div>
+<h1 class="text-2xl font-bold text-white tracking-tight">Projects Directory</h1>
+<p class="text-sm text-[#94a3b8] mt-1">
+            Track project rates, client associations, and individual billing overrides across autonomous engagements.
+          </p>
+</div>
+<!-- Action Cluster -->
+<div class="flex items-center gap-2.5 self-start md:self-auto">
+<button class="h-9 px-3.5 bg-[#131825] hover:bg-[#171d2d] text-[#f1f5f9] border border-[#232b3e] font-medium text-xs rounded-lg transition-all inline-flex items-center gap-2 shadow-xs" type="button">
+<span class="material-symbols-outlined text-base text-[#94a3b8]">download</span>
+<span>Export Ledger</span>
+</button>
+<button class="h-9 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-medium text-xs rounded-lg transition-all shadow-md shadow-purple-900/30 inline-flex items-center gap-1.5" id="openDrawerBtn" type="button">
+<span class="material-symbols-outlined text-base">add</span>
+<span>Create Project</span>
+</button>
+</div>
+</div>
+<!-- 4 Top KPI Cards Strip -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+<!-- Card 1 -->
+<div class="p-4 bg-[#131825] border border-[#232b3e] rounded-xl flex flex-col justify-between relative">
+<div class="flex items-center justify-between">
+<span class="text-xs uppercase font-medium text-[#94a3b8] tracking-wider">Active Inventory</span>
+<div class="w-8 h-8 rounded-lg bg-purple-950/50 border border-purple-800/40 flex items-center justify-center text-[#a78bfa]">
+<span class="material-symbols-outlined text-lg">folder_managed</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold text-white font-mono leading-none">9</div>
+<div class="text-xs text-[#94a3b8] mt-2 flex items-center gap-1.5">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span>7 Linked • 2 Standalone</span>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-4 bg-[#131825] border border-[#232b3e] rounded-xl flex flex-col justify-between relative">
+<div class="flex items-center justify-between">
+<span class="text-xs uppercase font-medium text-[#94a3b8] tracking-wider">Total Billed YTD</span>
+<div class="w-8 h-8 rounded-lg bg-emerald-950/40 border border-emerald-800/40 flex items-center justify-center text-emerald-400">
+<span class="material-symbols-outlined text-lg">payments</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold text-white font-mono leading-none">$27,532<span class="text-sm font-normal text-[#94a3b8]">.50</span></div>
+<div class="text-xs text-emerald-400 mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="font-mono font-medium">+14.2%</span>
+<span class="text-[#94a3b8]">vs last month</span>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="p-4 bg-[#131825] border border-[#232b3e] rounded-xl flex flex-col justify-between relative">
+<div class="flex items-center justify-between">
+<span class="text-xs uppercase font-medium text-[#94a3b8] tracking-wider">Override Ratio</span>
+<div class="w-8 h-8 rounded-lg bg-amber-950/40 border border-amber-800/40 flex items-center justify-center text-amber-400">
+<span class="material-symbols-outlined text-lg">tune</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold text-white font-mono leading-none">11.1%</div>
+<div class="text-xs text-[#94a3b8] mt-2 flex items-center gap-1">
+<span class="text-amber-400 font-medium">1 Custom Override</span> in flight
+            </div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="p-4 bg-[#131825] border border-[#232b3e] rounded-xl flex flex-col justify-between relative">
+<div class="flex items-center justify-between">
+<span class="text-xs uppercase font-medium text-[#94a3b8] tracking-wider">Blended Realized Rate</span>
+<div class="w-8 h-8 rounded-lg bg-indigo-950/40 border border-indigo-800/40 flex items-center justify-center text-indigo-400">
+<span class="material-symbols-outlined text-lg">query_stats</span>
+</div>
+</div>
+<div class="mt-3">
+<div class="text-2xl font-bold text-white font-mono leading-none">$125<span class="text-sm font-normal text-[#94a3b8]">.70/hr</span></div>
+<div class="text-xs text-[#94a3b8] mt-2">
+              Target floor: $110.00/hr
+            </div>
+</div>
+</div>
+</div>
+<!-- Main Workspace Container / Table -->
+<div class="bg-[#131825] border border-[#232b3e] rounded-xl overflow-hidden flex flex-col shadow-sm">
+<!-- Filter Bar & Segmented Tabs -->
+<div class="p-3.5 bg-[#0f131d] border-b border-[#232b3e] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+<!-- Segmented Tab Controls -->
+<div class="inline-flex p-1 bg-[#0b0e14] border border-[#232b3e] rounded-lg gap-1 overflow-x-auto">
+<button class="px-3 py-1.5 rounded-md text-xs font-semibold bg-[#171d2d] text-[#a78bfa] border border-[#232b3e] transition-colors" type="button">
+              All Projects (9)
+            </button>
+<button class="px-3 py-1.5 rounded-md text-xs font-medium text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] transition-colors" type="button">
+              Client Linked (7)
+            </button>
+<button class="px-3 py-1.5 rounded-md text-xs font-medium text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] transition-colors" type="button">
+              Standalone Projects (2)
+            </button>
+</div>
+<!-- Search & Filter Selectors -->
+<div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+<!-- Search Field -->
+<div class="relative w-full sm:w-64">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[#94a3b8] text-base">search</span>
+<input class="w-full h-8 pl-8 pr-3 bg-[#0b0e14] border border-[#232b3e] rounded-lg text-xs text-[#f1f5f9] placeholder-[#94a3b8]/50 focus:outline-none focus:border-[#a78bfa]" placeholder="Search project, ID, client..." type="text"/>
+</div>
+<!-- Rate Type Dropdown Filter -->
+<div class="relative">
+<select class="h-8 pl-2.5 pr-7 bg-[#0b0e14] border border-[#232b3e] text-[#f1f5f9] text-xs rounded-lg appearance-none focus:outline-none focus:border-[#a78bfa] cursor-pointer">
+<option value="all">All Rate Types</option>
+<option value="inherited">Inherited Rate</option>
+<option value="override">Custom Override</option>
+<option value="standalone">Standalone Rate</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2 text-[#94a3b8] pointer-events-none text-base">expand_more</span>
+</div>
+<!-- Status Filter -->
+<button class="h-8 px-2.5 bg-[#0b0e14] border border-[#232b3e] text-[#94a3b8] hover:text-[#f1f5f9] rounded-lg text-xs font-medium inline-flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-base">filter_list</span>
+<span>Filters</span>
+</button>
+</div>
+</div>
+<!-- Projects Data Table -->
+<div class="overflow-x-auto w-full">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="h-9 bg-[#0f131d]/60 border-b border-[#232b3e] text-[#94a3b8] text-[11px] font-mono uppercase tracking-wider">
+<th class="py-2 px-4 font-medium">Project &amp; ID</th>
+<th class="py-2 px-4 font-medium">Client Association</th>
+<th class="py-2 px-4 font-medium">Scope &amp; Description</th>
+<th class="py-2 px-4 font-medium">Billing Rate &amp; Rule</th>
+<th class="py-2 px-4 font-medium text-right">Hours Logged</th>
+<th class="py-2 px-4 font-medium text-right">Revenue</th>
+<th class="py-2 px-4 font-medium text-center">Status</th>
+<th class="py-2 px-4 text-center"><span class="sr-only">Actions</span></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#232b3e]/60 text-xs text-[#f1f5f9]">
+<!-- Row 1 -->
+<tr class="h-14 hover:bg-[#171d2d]/50 transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-purple-950/60 border border-purple-800/40 flex items-center justify-center text-[#a78bfa] font-bold text-xs">
+                      E
+                    </div>
+<div>
+<div class="font-medium text-[#f1f5f9] group-hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
+<span>E-Commerce Storefront</span>
+</div>
+<span class="font-mono text-[11px] text-[#94a3b8]">#PRJ-101</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-[#a78bfa]">domain</span>
+<span class="font-medium text-[#f1f5f9]">Acme Corp</span>
+<span class="font-mono text-[11px] text-[#94a3b8]">(#CLI-001)</span>
+</div>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="text-xs text-[#94a3b8] truncate">
+                    Next.js storefront, Stripe checkout &amp; headless CMS
+                  </p>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<div class="font-mono text-xs text-[#f1f5f9] font-medium">$130.00/hr</div>
+<div class="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium mt-0.5">
+<span class="material-symbols-outlined text-xs">link</span>
+<span>Inherited from Acme Corp</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-medium text-[#f1f5f9]">68.5 hrs</span>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-semibold text-white">$8,905.00</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
+                    Active
+                  </span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 (Custom Override) -->
+<tr class="h-14 bg-amber-950/10 hover:bg-amber-950/20 transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-amber-950/60 border border-amber-800/40 flex items-center justify-center text-amber-400 font-bold text-xs">
+                      V
+                    </div>
+<div>
+<div class="font-medium text-[#f1f5f9] group-hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
+<span>Video Streaming Mobile App</span>
+</div>
+<span class="font-mono text-[11px] text-[#94a3b8]">#PRJ-102</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-[#a78bfa]">domain</span>
+<span class="font-medium text-[#f1f5f9]">Starlight Media</span>
+<span class="font-mono text-[11px] text-[#94a3b8]">(#CLI-002)</span>
+</div>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="text-xs text-[#94a3b8] truncate">
+                    React Native streaming app with DRM and caching
+                  </p>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs text-[#f1f5f9] font-medium">$115.00/hr</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] uppercase font-bold tracking-wider bg-amber-950/60 border border-amber-800/40 text-amber-400">
+                        Override
+                      </span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] text-amber-400 font-medium mt-0.5">
+<span class="material-symbols-outlined text-xs">tune</span>
+<span>Client standard is $100.00/hr</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-medium text-[#f1f5f9]">52.0 hrs</span>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-semibold text-white">$5,980.00</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
+                    Active
+                  </span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="h-14 hover:bg-[#171d2d]/50 transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-purple-950/60 border border-purple-800/40 flex items-center justify-center text-[#a78bfa] font-bold text-xs">
+                      A
+                    </div>
+<div>
+<div class="font-medium text-[#f1f5f9] group-hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
+<span>API Microservice</span>
+</div>
+<span class="font-mono text-[11px] text-[#94a3b8]">#PRJ-103</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-[#a78bfa]">domain</span>
+<span class="font-medium text-[#f1f5f9]">Acme Corp</span>
+<span class="font-mono text-[11px] text-[#94a3b8]">(#CLI-001)</span>
+</div>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="text-xs text-[#94a3b8] truncate">
+                    Go gRPC high-throughput auth and webhook engine
+                  </p>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<div class="font-mono text-xs text-[#f1f5f9] font-medium">$130.00/hr</div>
+<div class="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium mt-0.5">
+<span class="material-symbols-outlined text-xs">link</span>
+<span>Inherited from Acme Corp</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-medium text-[#f1f5f9]">34.0 hrs</span>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-semibold text-white">$4,420.00</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
+                    Active
+                  </span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 (Standalone) -->
+<tr class="h-14 hover:bg-[#171d2d]/50 transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-[#171d2d] border border-[#232b3e] flex items-center justify-center text-[#94a3b8] font-bold text-xs">
+                      I
+                    </div>
+<div>
+<div class="font-medium text-[#f1f5f9] group-hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
+<span>Internal Tools &amp; Portfolio</span>
+</div>
+<span class="font-mono text-[11px] text-[#94a3b8]">#PRJ-104</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#0b0e14] border border-[#232b3e] text-[#94a3b8] text-[11px] font-medium">
+<span class="material-symbols-outlined text-xs">person_off</span>
+<span>Standalone (No Client)</span>
+</div>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="text-xs text-[#94a3b8] truncate">
+                    Personal freelance portfolio, open-source CLI utilities
+                  </p>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-mono text-xs text-[#f1f5f9] font-medium">$95.00/hr</span>
+<span class="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] uppercase font-bold tracking-wider bg-[#171d2d] border border-[#232b3e] text-[#94a3b8]">
+                        Direct
+                      </span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] text-[#94a3b8] font-medium mt-0.5">
+<span>Individual Project Rate</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-medium text-[#f1f5f9]">22.5 hrs</span>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-semibold text-white">$2,137.50</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
+                    Active
+                  </span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="h-14 hover:bg-[#171d2d]/50 transition-colors group">
+<td class="py-3 px-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-purple-950/60 border border-purple-800/40 flex items-center justify-center text-[#a78bfa] font-bold text-xs">
+                      T
+                    </div>
+<div>
+<div class="font-medium text-[#f1f5f9] group-hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
+<span>Telehealth Portal</span>
+</div>
+<span class="font-mono text-[11px] text-[#94a3b8]">#PRJ-105</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-[#a78bfa]">domain</span>
+<span class="font-medium text-[#f1f5f9]">Nexus Health</span>
+<span class="font-mono text-[11px] text-[#94a3b8]">(#CLI-003)</span>
+</div>
+</td>
+<td class="py-3 px-4 max-w-xs">
+<p class="text-xs text-[#94a3b8] truncate">
+                    HIPAA compliant patient appointment video scheduler
+                  </p>
+</td>
+<td class="py-3 px-4">
+<div class="flex flex-col">
+<div class="font-mono text-xs text-[#f1f5f9] font-medium">$145.00/hr</div>
+<div class="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-medium mt-0.5">
+<span class="material-symbols-outlined text-xs">link</span>
+<span>Inherited from Nexus Health</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-medium text-[#f1f5f9]">42.0 hrs</span>
+</td>
+<td class="py-3 px-4 text-right">
+<span class="font-mono font-semibold text-white">$6,090.00</span>
+</td>
+<td class="py-3 px-4 text-center">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-950/60 border border-emerald-800/40 text-emerald-400">
+                    Active
+                  </span>
+</td>
+<td class="py-3 px-4 text-center">
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">more_horiz</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination Controls -->
+<div class="px-4 py-3 bg-[#0f131d] border-t border-[#232b3e] flex flex-col sm:flex-row items-center justify-between gap-3">
+<span class="text-xs text-[#94a3b8]">
+            Showing 5 of 9 active ledger projects
+          </span>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] disabled:opacity-30 disabled:hover:text-[#94a3b8]" disabled="" type="button">
+<span class="material-symbols-outlined text-base">chevron_left</span>
+</button>
+<span class="px-2 py-0.5 text-xs font-mono text-[#a78bfa] font-bold bg-[#171d2d] border border-purple-800/40 rounded">1</span>
+<button class="px-2 py-0.5 text-xs font-mono text-[#94a3b8] hover:text-[#f1f5f9] rounded" type="button">2</button>
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9]" type="button">
+<span class="material-symbols-outlined text-base">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- 'Create New Project' Slide-Over Drawer & Overlay -->
+<div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden transition-opacity duration-300" id="drawerBackdrop">
+<div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+<div class="w-screen max-w-md bg-[#0f131d] border-l border-[#232b3e] shadow-2xl flex flex-col justify-between transform translate-x-full transition-transform duration-300 ease-in-out" id="drawerPanel">
+<!-- Drawer Header -->
+<div class="p-5 border-b border-[#232b3e] bg-[#131825] flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-[#a78bfa] text-xl">create_new_folder</span>
+<h2 class="text-base font-bold text-white tracking-tight">Create New Project</h2>
+</div>
+<button class="p-1 rounded-lg text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors" id="closeDrawerBtn" type="button">
+<span class="material-symbols-outlined text-xl">close</span>
+</button>
+</div>
+<!-- Drawer Form Body -->
+<div class="p-5 flex-1 overflow-y-auto flex flex-col gap-4">
+<!-- Project ID (Read-only/auto) -->
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-medium text-[#f1f5f9] flex items-center justify-between">
+<span>Project ID</span>
+<span class="text-[11px] text-emerald-400 font-mono font-normal">Auto-assigned</span>
+</label>
+<div class="h-9 px-3 bg-[#0b0e14] border border-[#232b3e] rounded-lg font-mono text-xs text-[#94a3b8] flex items-center">
+              #PRJ-106
+            </div>
+</div>
+<!-- Project Name -->
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-medium text-[#f1f5f9]" for="drawerProjectName">
+              Project Name <span class="text-red-400">*</span>
+</label>
+<input class="h-9 px-3 bg-[#0b0e14] border border-[#232b3e] rounded-lg text-xs text-[#f1f5f9] focus:outline-none focus:border-[#a78bfa]" id="drawerProjectName" placeholder="e.g. Mobile App Redesign" type="text" value="Cloud Infrastructure Migration"/>
+</div>
+<!-- Client Selection Dropdown -->
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-medium text-[#f1f5f9]" for="drawerClientSelect">
+              Client Association
+            </label>
+<div class="relative">
+<select class="w-full h-9 pl-3 pr-8 bg-[#0b0e14] border border-[#232b3e] text-[#f1f5f9] text-xs rounded-lg appearance-none focus:outline-none focus:border-[#a78bfa] cursor-pointer" id="drawerClientSelect">
+<option data-default-rate="130.00" data-name="Acme Corp" value="CLI-001">Acme Corp (#CLI-001) — Default $130.00/hr</option>
+<option data-default-rate="100.00" data-name="Starlight Media" value="CLI-002">Starlight Media (#CLI-002) — Default $100.00/hr</option>
+<option data-default-rate="145.00" data-name="Nexus Health" value="CLI-003">Nexus Health (#CLI-003) — Default $145.00/hr</option>
+<option data-default-rate="0" data-name="Standalone" value="NONE">None / Standalone Project (No Client)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 text-[#94a3b8] pointer-events-none text-base">expand_more</span>
+</div>
+<p class="text-[11px] text-[#94a3b8]">Select None for autonomous projects or private tools.</p>
+</div>
+<!-- Description (Optional) -->
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-medium text-[#f1f5f9]" for="drawerDesc">
+              Description <span class="text-[11px] text-[#94a3b8] font-normal">(Optional)</span>
+</label>
+<textarea class="p-3 bg-[#0b0e14] border border-[#232b3e] rounded-lg text-xs text-[#f1f5f9] focus:outline-none focus:border-[#a78bfa] resize-none" id="drawerDesc" placeholder="Brief summary of deliverables, tech stack, or milestone goals..." rows="3">AWS Terraform multi-region deployment with zero-downtime database replication.</textarea>
+</div>
+<!-- Hourly Billing Rate Field -->
+<div class="flex flex-col gap-1.5">
+<label class="text-xs font-medium text-[#f1f5f9] flex items-center justify-between" for="drawerRateInput">
+<span>Billing Hourly Rate ($/hr)</span>
+<span class="text-[11px] text-[#94a3b8]">Leave blank to inherit</span>
+</label>
+<div class="relative">
+<span class="absolute left-3 top-2 font-mono text-xs text-[#94a3b8]">$</span>
+<input class="w-full h-9 pl-7 pr-12 bg-[#0b0e14] border border-[#232b3e] rounded-lg font-mono text-xs text-[#f1f5f9] focus:outline-none focus:border-[#a78bfa]" id="drawerRateInput" placeholder="130.00" step="5" type="number"/>
+<span class="absolute right-3 top-2 text-xs text-[#94a3b8]">/hr</span>
+</div>
+<p class="text-[11px] text-[#94a3b8]">
+              Optional: Leave blank to inherit client rate (<span class="font-mono text-white font-medium" id="clientDefaultHint">$130.00/hr</span>). If standalone, enter rate directly.
+            </p>
+</div>
+<!-- Dynamic Live Rate Preview Banner -->
+<div class="p-3.5 rounded-lg bg-[#131825] border border-[#232b3e] flex items-start gap-3 transition-all" id="liveRatePreview">
+<span class="material-symbols-outlined text-[#a78bfa] text-xl mt-0.5" id="ratePreviewIcon">link</span>
+<div class="flex flex-col">
+<span class="text-[11px] uppercase font-mono font-medium text-[#94a3b8] tracking-wider">Live Rate Preview</span>
+<div class="text-sm font-semibold text-white mt-0.5" id="ratePreviewText">
+                Active rate will be: <span class="font-mono text-[#a78bfa] font-bold">$130.00/hr</span>
+</div>
+<span class="text-xs text-emerald-400 font-medium mt-0.5" id="ratePreviewSub">
+                (Inherited from Acme Corp)
+              </span>
+</div>
+</div>
+</div>
+<!-- Drawer Footer Buttons -->
+<div class="p-4 border-t border-[#232b3e] bg-[#131825] flex items-center justify-end gap-2.5">
+<button class="h-9 px-3.5 bg-[#0b0e14] hover:bg-[#171d2d] text-[#94a3b8] hover:text-[#f1f5f9] border border-[#232b3e] text-xs font-medium rounded-lg transition-colors" id="cancelDrawerBtn" type="button">
+            Cancel
+          </button>
+<button class="h-9 px-4 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-medium rounded-lg transition-all shadow-md shadow-purple-900/30 inline-flex items-center gap-1.5" id="submitCreateProjectBtn" type="button">
+<span class="material-symbols-outlined text-base">check</span>
+<span>Create Project</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+    (function initProjectsDirectory() {
+      const openDrawerBtn = document.getElementById('openDrawerBtn');
+      const closeDrawerBtn = document.getElementById('closeDrawerBtn');
+      const cancelDrawerBtn = document.getElementById('cancelDrawerBtn');
+      const drawerBackdrop = document.getElementById('drawerBackdrop');
+      const drawerPanel = document.getElementById('drawerPanel');
+      const clientSelect = document.getElementById('drawerClientSelect');
+      const rateInput = document.getElementById('drawerRateInput');
+      const liveRatePreview = document.getElementById('liveRatePreview');
+      const ratePreviewText = document.getElementById('ratePreviewText');
+      const ratePreviewSub = document.getElementById('ratePreviewSub');
+      const ratePreviewIcon = document.getElementById('ratePreviewIcon');
+      const clientDefaultHint = document.getElementById('clientDefaultHint');
+
+      function openDrawer() {
+        drawerBackdrop.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          drawerBackdrop.classList.remove('opacity-0');
+          drawerPanel.classList.remove('translate-x-full');
+        });
+        updateLiveRatePreview();
+      }
+
+      function closeDrawer() {
+        drawerPanel.classList.add('translate-x-full');
+        drawerBackdrop.classList.add('opacity-0');
+        setTimeout(() => {
+          drawerBackdrop.classList.add('hidden');
+        }, 300);
+      }
+
+      function updateLiveRatePreview() {
+        const selectedOption = clientSelect.options[clientSelect.selectedIndex];
+        const isStandalone = clientSelect.value === 'NONE';
+        const clientName = selectedOption.getAttribute('data-name');
+        const defaultRateVal = parseFloat(selectedOption.getAttribute('data-default-rate') || '0');
+        const customRateVal = rateInput.value.trim() !== '' ? parseFloat(rateInput.value) : null;
+
+        if (isStandalone) {
+          clientDefaultHint.textContent = 'None';
+          if (customRateVal !== null) {
+            ratePreviewText.innerHTML = `Active rate will be: <span class="font-mono font-bold text-white">$${customRateVal.toFixed(2)}/hr</span>`;
+            ratePreviewSub.textContent = '(Standalone Direct Rate)';
+            ratePreviewSub.className = 'text-xs text-[#94a3b8] font-medium mt-0.5';
+            liveRatePreview.className = 'p-3.5 rounded-lg bg-[#131825] border border-[#232b3e] flex items-start gap-3';
+            ratePreviewIcon.textContent = 'person_off';
+            ratePreviewIcon.className = 'material-symbols-outlined text-[#94a3b8] text-xl mt-0.5';
+          } else {
+            ratePreviewText.innerHTML = `Active rate will be: <span class="font-mono font-bold text-red-400">$0.00/hr</span>`;
+            ratePreviewSub.textContent = '(Specify a standalone rate)';
+            ratePreviewSub.className = 'text-xs text-red-400 font-medium mt-0.5';
+            liveRatePreview.className = 'p-3.5 rounded-lg bg-red-950/20 border border-red-800/40 flex items-start gap-3';
+            ratePreviewIcon.textContent = 'warning';
+            ratePreviewIcon.className = 'material-symbols-outlined text-red-400 text-xl mt-0.5';
+          }
+        } else {
+          clientDefaultHint.textContent = `$${defaultRateVal.toFixed(2)}/hr`;
+          if (customRateVal !== null) {
+            ratePreviewText.innerHTML = `Active rate will be: <span class="font-mono font-bold text-amber-300">$${customRateVal.toFixed(2)}/hr</span>`;
+            ratePreviewSub.textContent = `(Custom Override — client default is $${defaultRateVal.toFixed(2)}/hr)`;
+            ratePreviewSub.className = 'text-xs text-amber-400 font-medium mt-0.5';
+            liveRatePreview.className = 'p-3.5 rounded-lg bg-amber-950/20 border border-amber-800/40 flex items-start gap-3';
+            ratePreviewIcon.textContent = 'tune';
+            ratePreviewIcon.className = 'material-symbols-outlined text-amber-400 text-xl mt-0.5';
+          } else {
+            ratePreviewText.innerHTML = `Active rate will be: <span class="font-mono font-bold text-[#a78bfa]">$${defaultRateVal.toFixed(2)}/hr</span>`;
+            ratePreviewSub.textContent = `(Inherited from ${clientName})`;
+            ratePreviewSub.className = 'text-xs text-emerald-400 font-medium mt-0.5';
+            liveRatePreview.className = 'p-3.5 rounded-lg bg-[#131825] border border-[#232b3e] flex items-start gap-3';
+            ratePreviewIcon.textContent = 'link';
+            ratePreviewIcon.className = 'material-symbols-outlined text-[#a78bfa] text-xl mt-0.5';
+          }
+        }
+      }
+
+      if (openDrawerBtn) openDrawerBtn.addEventListener('click', openDrawer);
+      if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+      if (cancelDrawerBtn) cancelDrawerBtn.addEventListener('click', closeDrawer);
+
+      if (clientSelect) clientSelect.addEventListener('change', updateLiveRatePreview);
+      if (rateInput) rateInput.addEventListener('input', updateLiveRatePreview);
+
+      if (drawerBackdrop) {
+        drawerBackdrop.addEventListener('click', (e) => {
+          if (e.target === drawerBackdrop) closeDrawer();
+        });
+      }
+
+      const submitBtn = document.getElementById('submitCreateProjectBtn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', () => {
+          submitBtn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">refresh</span><span>Saving...</span>';
+          setTimeout(() => {
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-base">check</span><span>Created!</span>';
+            setTimeout(() => {
+              closeDrawer();
+              submitBtn.innerHTML = '<span class="material-symbols-outlined text-base">check</span><span>Create Project</span>';
+            }, 500);
+          }, 600);
+        });
+      }
+    })();
+  </script>
+</body></html>

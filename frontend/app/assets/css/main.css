@@ -1,0 +1,247 @@
+@import "tailwindcss";
+@plugin "tailwindcss-primeui";
+
+/* Tailwind's `dark:` variant is bound to the same class PrimeVue uses (R14). */
+@custom-variant dark (&:where(.app-dark, .app-dark *));
+
+/* ---------------------------------------------------------------------------
+ * Semantic tokens.
+ * Mirrors the colour names used by the design HTML so utility classes such as
+ * `bg-surface-container-low` / `text-on-surface` resolve. Light is the default;
+ * `.app-dark` on <html> switches the whole tree (PrimeVue + Tailwind stay in sync).
+ * ------------------------------------------------------------------------- */
+:root {
+  --bf-background: #fafafa;
+  --bf-on-background: #18181b;
+  --bf-surface: #ffffff;
+  --bf-surface-dim: #f4f4f5;
+  --bf-surface-bright: #ffffff;
+  --bf-surface-container-lowest: #ffffff;
+  --bf-surface-container-low: #fafafa;
+  --bf-surface-container: #f4f4f5;
+  --bf-surface-container-high: #e4e4e7;
+  --bf-surface-container-highest: #d4d4d8;
+  --bf-surface-variant: #e4e4e7;
+  --bf-on-surface: #18181b;
+  --bf-on-surface-variant: #52525b;
+  --bf-outline: #a1a1aa;
+  --bf-outline-variant: #e4e4e7;
+  --bf-primary: #7c3aed;
+  --bf-primary-container: #ede9fe;
+  --bf-on-primary: #ffffff;
+  --bf-on-primary-container: #4c1d95;
+  --bf-primary-fixed: #4c1d95;
+  --bf-primary-fixed-dim: #5b21b6;
+  --bf-on-primary-fixed: #ede9fe;
+  --bf-on-primary-fixed-variant: #c4b5fd;
+  --bf-inverse-primary: #a78bfa;
+  --bf-secondary: #52525b;
+  --bf-secondary-container: #e4e4e7;
+  --bf-on-secondary: #ffffff;
+  --bf-on-secondary-container: #3f3f46;
+  --bf-tertiary: #059669;
+  --bf-tertiary-container: #d1fae5;
+  --bf-on-tertiary: #ffffff;
+  --bf-on-tertiary-container: #065f46;
+  --bf-tertiary-fixed: #065f46;
+  --bf-tertiary-fixed-dim: #047857;
+  --bf-on-tertiary-fixed: #d1fae5;
+  --bf-on-tertiary-fixed-variant: #6ee7b7;
+  --bf-error: #dc2626;
+  --bf-error-container: #fee2e2;
+  --bf-on-error: #ffffff;
+  --bf-on-error-container: #991b1b;
+  --bf-inverse-surface: #27272a;
+  --bf-inverse-on-surface: #fafafa;
+  --bf-warning: #b45309;
+  --bf-warning-container: #fef3c7;
+
+  /* DESIGN.md: borders over shadows. These stay deliberately faint. */
+  --bf-shadow-card: 0 1px 2px rgb(0 0 0 / 0.04);
+  --bf-shadow-panel: 0 1px 8px rgb(0 0 0 / 0.06);
+}
+
+.app-dark {
+  --bf-background: #09090b;
+  --bf-on-background: #fafafa;
+  --bf-surface: #0c0c0f;
+  --bf-surface-dim: #0c0c0f;
+  --bf-surface-bright: #18181b;
+  --bf-surface-container-lowest: #09090b;
+  --bf-surface-container-low: #0f0f12;
+  --bf-surface-container: #121215;
+  --bf-surface-container-high: #18181b;
+  --bf-surface-container-highest: #1e1e22;
+  --bf-surface-variant: #18181b;
+  --bf-on-surface: #fafafa;
+  --bf-on-surface-variant: #a1a1aa;
+  --bf-outline: #52525b;
+  --bf-outline-variant: #27272a;
+  --bf-primary: #a78bfa;
+  --bf-primary-container: #7c3aed;
+  --bf-on-primary: #0a0012;
+  --bf-on-primary-container: #ede9fe;
+  --bf-primary-fixed: #ede9fe;
+  --bf-primary-fixed-dim: #c4b5fd;
+  --bf-on-primary-fixed: #2e1065;
+  --bf-on-primary-fixed-variant: #5b21b6;
+  --bf-inverse-primary: #5b21b6;
+  --bf-secondary: #71717a;
+  --bf-secondary-container: #27272a;
+  --bf-on-secondary: #09090b;
+  --bf-on-secondary-container: #a1a1aa;
+  --bf-tertiary: #34d399;
+  --bf-tertiary-container: #065f46;
+  --bf-on-tertiary: #001a12;
+  --bf-on-tertiary-container: #bbf7d0;
+  --bf-tertiary-fixed: #bbf7d0;
+  --bf-tertiary-fixed-dim: #6ee7b7;
+  --bf-on-tertiary-fixed: #003318;
+  --bf-on-tertiary-fixed-variant: #047857;
+  --bf-error: #ef4444;
+  --bf-error-container: #3b1111;
+  --bf-on-error: #1a0000;
+  --bf-on-error-container: #fca5a5;
+  --bf-inverse-surface: #fafafa;
+  --bf-inverse-on-surface: #09090b;
+  --bf-warning: #fbbf24;
+  --bf-warning-container: #422006;
+
+  --bf-shadow-card: 0 1px 2px rgb(0 0 0 / 0.5);
+  --bf-shadow-panel: 0 1px 8px rgb(0 0 0 / 0.4);
+}
+
+/* Map the semantic custom properties into Tailwind's theme namespace. */
+@theme inline {
+  --color-background: var(--bf-background);
+  --color-on-background: var(--bf-on-background);
+  --color-surface: var(--bf-surface);
+  --color-surface-dim: var(--bf-surface-dim);
+  --color-surface-bright: var(--bf-surface-bright);
+  --color-surface-container-lowest: var(--bf-surface-container-lowest);
+  --color-surface-container-low: var(--bf-surface-container-low);
+  --color-surface-container: var(--bf-surface-container);
+  --color-surface-container-high: var(--bf-surface-container-high);
+  --color-surface-container-highest: var(--bf-surface-container-highest);
+  --color-surface-variant: var(--bf-surface-variant);
+  --color-on-surface: var(--bf-on-surface);
+  --color-on-surface-variant: var(--bf-on-surface-variant);
+  --color-outline: var(--bf-outline);
+  --color-outline-variant: var(--bf-outline-variant);
+  --color-primary: var(--bf-primary);
+  --color-primary-container: var(--bf-primary-container);
+  --color-on-primary: var(--bf-on-primary);
+  --color-on-primary-container: var(--bf-on-primary-container);
+  --color-primary-fixed: var(--bf-primary-fixed);
+  --color-primary-fixed-dim: var(--bf-primary-fixed-dim);
+  --color-on-primary-fixed: var(--bf-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--bf-on-primary-fixed-variant);
+  --color-inverse-primary: var(--bf-inverse-primary);
+  --color-secondary: var(--bf-secondary);
+  --color-secondary-container: var(--bf-secondary-container);
+  --color-on-secondary: var(--bf-on-secondary);
+  --color-on-secondary-container: var(--bf-on-secondary-container);
+  --color-tertiary: var(--bf-tertiary);
+  --color-tertiary-container: var(--bf-tertiary-container);
+  --color-on-tertiary: var(--bf-on-tertiary);
+  --color-on-tertiary-container: var(--bf-on-tertiary-container);
+  --color-tertiary-fixed: var(--bf-tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--bf-tertiary-fixed-dim);
+  --color-on-tertiary-fixed: var(--bf-on-tertiary-fixed);
+  --color-on-tertiary-fixed-variant: var(--bf-on-tertiary-fixed-variant);
+  --color-error: var(--bf-error);
+  --color-error-container: var(--bf-error-container);
+  --color-on-error: var(--bf-on-error);
+  --color-on-error-container: var(--bf-on-error-container);
+  --color-inverse-surface: var(--bf-inverse-surface);
+  --color-inverse-on-surface: var(--bf-inverse-on-surface);
+  --color-warning: var(--bf-warning);
+  --color-warning-container: var(--bf-warning-container);
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #__nuxt {
+    min-height: 100%;
+  }
+
+  body {
+    background-color: var(--bf-background);
+    color: var(--bf-on-surface);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* DESIGN.md: tight tracking on headings. */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background-color: color-mix(in srgb, var(--bf-primary) 22%, transparent);
+    color: var(--bf-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--bf-primary);
+    outline-offset: 2px;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bf-surface-container-low);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--bf-outline-variant);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--bf-outline);
+  }
+}
+
+@layer components {
+  /* Reusable surfaces used across every view. */
+  .bf-card {
+    background-color: var(--bf-surface-container);
+    border: 1px solid var(--bf-outline-variant);
+    border-radius: 12px;
+    box-shadow: var(--bf-shadow-card);
+  }
+
+  .bf-panel {
+    background-color: var(--bf-surface-container);
+    border: 1px solid var(--bf-outline-variant);
+    border-radius: 16px;
+    box-shadow: var(--bf-shadow-panel);
+  }
+
+  .bf-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bf-on-surface-variant);
+  }
+}
+
+/* PrimeVue overlays pick up the same surface + border treatment. */
+.p-dialog,
+.p-confirmdialog {
+  border: 1px solid var(--bf-outline-variant);
+}
+
+.p-tooltip .p-tooltip-text {
+  background-color: var(--bf-surface-container-highest);
+  color: var(--bf-on-surface);
+  font-size: 11px;
+}

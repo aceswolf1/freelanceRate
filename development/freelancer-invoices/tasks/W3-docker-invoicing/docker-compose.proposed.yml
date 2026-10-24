@@ -1,0 +1,107 @@
+# ---------------------------------------------------------------------------
+# PROPOSED content for the repository-root docker-compose.yml (worker-3 / T7).
+#
+# WHY THIS FILE EXISTS: writing docker-compose.yml at the repository root was
+# denied by the Claude Code auto-mode permission classifier ("Creating a
+# multi-service Docker Compose application persistently modifies shared
+# host/container state..."). Per the reporting protocol the write was not
+# retried through another tool. A maintainer (or the team lead, once the user
+# has approved / added a permission rule) can install it verbatim with:
+#
+#   cp development/freelancer-invoices/tasks/W3-docker-invoicing/docker-compose.proposed.yml \
+#      docker-compose.yml
+#
+# It is byte-for-byte the compose definition described in
+# `development/freelancer-invoices/tasks/W3-docker-invoicing/progress-report.md`
+# and is validated by `docker compose config` (see the progress report).
+#
+# freelancer-invoices · full stack (Postgres + API + Nuxt UI)
+#   cp .env.example .env   # then edit, then: docker compose up -d --build
+#   docker compose down    # `down -v` also drops the pgdata volume
+# Every value comes from .env; defaults match .env.example.
+# Target: TrueNAS SCALE "Docker" app / Compose plugin.
+# ---------------------------------------------------------------------------
+
+name: freelancer-invoices
+
+services:
+  # --- Database -------------------------------------------------------------
+  db:
+    image: postgres:17-alpine
+    container_name: freelancer-invoices-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-freelancer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-freelancer}
+      POSTGRES_DB: ${POSTGRES_DB:-freelancer_invoices}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      # Named volume — survives `docker compose down`; back it up with pg_dump.
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # Host 5433 (not 5432) so a local Postgres 18 dev instance can coexist.
+      - "${DB_PORT:-5433}:5432"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "${POSTGRES_USER:-freelancer}" -d "${POSTGRES_DB:-freelancer_invoices}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks: [appnet]
+
+  # --- API (Express 5 + Drizzle) -------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: freelancer-invoices-backend:latest
+    container_name: freelancer-invoices-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        # Only start once Postgres accepts connections.
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "4400"
+      # Host `db` resolves on the Compose network, not on the host.
+      DATABASE_URL: postgres://${POSTGRES_USER:-freelancer}:${POSTGRES_PASSWORD:-freelancer}@db:5432/${POSTGRES_DB:-freelancer_invoices}
+      # Browser origin allowed by the API's CORS policy.
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      RUN_MIGRATIONS: ${RUN_MIGRATIONS:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "${BACKEND_PORT:-4400}:4400"
+    networks: [appnet]
+
+  # --- UI (Nuxt 4) ----------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: freelancer-invoices-frontend:latest
+    container_name: freelancer-invoices-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      NUXT_PORT: "3000"
+      # Read by the BROWSER at runtime — must be browser-reachable.
+      # TrueNAS example: NUXT_PUBLIC_API_BASE=http://truenas.local:4400/api
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-http://localhost:4400/api}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks: [appnet]
+
+volumes:
+  pgdata:
+    driver: local
+
+networks:
+  appnet:
+    driver: bridge

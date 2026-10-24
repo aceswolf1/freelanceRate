@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>BillFlow - Weekly Timesheet</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<style>
+  @layer base {
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #0b0e14;
+      color: #f1f5f9;
+      font-family: 'Geist', sans-serif;
+    }
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0e121b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #232b3e;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #333f56;
+  }
+</style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "on-error": "#1a0000",
+          "surface": "#0c0c0f",
+          "error-container": "#3b1111",
+          "on-surface": "#fafafa",
+          "surface-container": "#121215",
+          "primary-fixed": "#ede9fe",
+          "tertiary": "#34d399",
+          "surface-dim": "#0c0c0f",
+          "on-surface-variant": "#a1a1aa",
+          "inverse-on-surface": "#09090b",
+          "inverse-primary": "#5b21b6",
+          "on-primary-container": "#ede9fe",
+          "error": "#ef4444",
+          "on-background": "#fafafa",
+          "on-primary": "#0a0012",
+          "on-secondary-fixed-variant": "#3f3f46",
+          "secondary": "#71717a",
+          "primary": "#a78bfa",
+          "on-tertiary-container": "#bbf7d0",
+          "on-error-container": "#fca5a5",
+          "outline-variant": "#27272a",
+          "on-secondary": "#09090b",
+          "on-primary-fixed-variant": "#5b21b6",
+          "surface-tint": "#a78bfa",
+          "primary-container": "#7c3aed",
+          "surface-variant": "#18181b",
+          "surface-container-highest": "#1e1e22",
+          "secondary-container": "#27272a",
+          "outline": "#52525b",
+          "background": "#0b0e14"
+        },
+        fontFamily: {
+          sans: ["Geist", "sans-serif"]
+        }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-[#0b0e14] text-[#f1f5f9] min-h-screen flex antialiased selection:bg-[#a78bfa]/20 selection:text-[#a78bfa]">
+<!-- Persistent Left Sidebar (~260px) -->
+<aside class="w-[260px] flex-shrink-0 bg-[#0e121b] border-r border-[#232b3e] h-screen sticky top-0 flex flex-col justify-between z-40 hidden md:flex">
+<div class="flex flex-col h-full overflow-y-auto">
+<!-- App Brand & Version -->
+<div class="p-5 border-b border-[#232b3e]/80">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#7c3aed] to-[#a78bfa] flex items-center justify-center text-white shadow-lg shadow-[#7c3aed]/20">
+<span class="material-symbols-outlined text-xl">receipt_long</span>
+</div>
+<div class="flex flex-col">
+<span class="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
+              BillFlow
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#a78bfa]/15 text-[#a78bfa] font-mono font-normal">v2.4</span>
+</span>
+<span class="text-[11px] text-[#64748b] leading-none">Freelance Ops System</span>
+</div>
+</div>
+<!-- Active Cycle Status Badge -->
+<div class="mt-4 p-2.5 rounded-lg bg-[#131825] border border-[#232b3e] flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-medium text-[#94a3b8] flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-[#34d399] animate-pulse"></span>
+              Week 43 Active
+            </span>
+<span class="text-[10px] font-mono text-[#64748b]">Open</span>
+</div>
+<span class="text-[11px] text-[#f1f5f9] font-mono">Oct 19 – Oct 25, 2026</span>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="p-3 flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#a78bfa] text-[#0a0012] font-semibold text-sm shadow-sm transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">date_range</span>
+<span>Weekly Timesheet</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">request_quote</span>
+<span>Invoice Generator</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span>Clients</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">folder</span>
+<span>Projects</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] font-medium text-sm transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<!-- Bottom User Profile Card -->
+<div class="p-3 border-t border-[#232b3e]/80">
+<div class="p-2.5 rounded-xl bg-[#131825] border border-[#232b3e] flex items-center justify-between hover:border-[#333f56] transition-colors cursor-pointer group">
+<div class="flex items-center gap-2.5 min-w-0">
+<img alt="Alex Morgan" class="w-8 h-8 rounded-full object-cover ring-1 ring-[#a78bfa]/40 flex-shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDE87JTbH7uxeaO0BNQRhTTEJkmsCUpoOVIvWEYZP_PLxj0l1n93zIcwcR4ThAhgCE51x6i0NKm3e2zILRSO_G69XzwROOsGTf8E8Vlm6JHFXPI6J1S_SbcbzWIYkQr90j6i5HXZ6i7yPkjlh61JxWKLAmFTXEA5rRAxijZYakzveP8MaBf9iPgUp8XtHv6ymiqK1G8fhLydffQvYrhNkv56gcnpseM87oHSL73V9VmR142uyaFK_lN"/>
+<div class="flex flex-col min-w-0 leading-tight">
+<span class="text-xs font-semibold text-[#f1f5f9] truncate group-hover:text-[#a78bfa] transition-colors">Alex Morgan</span>
+<span class="text-[11px] text-[#64748b] truncate">Senior Consultant</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[#64748b] group-hover:text-[#f1f5f9] text-base">unfold_more</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col min-w-0 bg-[#0b0e14]">
+<!-- Top Bar within Main Workspace -->
+<header class="h-16 px-6 border-b border-[#232b3e] bg-[#0e121b]/80 backdrop-blur-md sticky top-0 z-30 flex items-center justify-between gap-4">
+<!-- Breadcrumbs & Quick info -->
+<div class="flex items-center gap-3 min-w-0">
+<div class="flex items-center gap-2 text-xs text-[#94a3b8]">
+<span class="hover:text-[#f1f5f9] cursor-pointer">Workspaces</span>
+<span class="text-[#64748b]">/</span>
+<span class="text-[#f1f5f9] font-medium truncate">Weekly Timesheet</span>
+</div>
+</div>
+<!-- Center Search Bar -->
+<div class="hidden md:flex items-center flex-1 max-w-md mx-4">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#64748b]">search</span>
+<input class="w-full h-9 pl-9 pr-8 bg-[#131825] border border-[#232b3e] rounded-lg text-xs text-[#f1f5f9] placeholder-[#64748b] focus:outline-none focus:border-[#a78bfa] focus:ring-1 focus:ring-[#a78bfa] transition-all" placeholder="Search entries, clients, projects, tasks..." type="text"/>
+<span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[#64748b] bg-[#0e121b] border border-[#232b3e] px-1.5 py-0.5 rounded font-mono">⌘K</span>
+</div>
+</div>
+<!-- Right Actions -->
+<div class="flex items-center gap-3 flex-shrink-0">
+<button class="relative p-2 text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#131825] rounded-lg border border-transparent hover:border-[#232b3e] transition-colors" title="Notifications" type="button">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-[#ef4444] rounded-full ring-2 ring-[#0e121b]"></span>
+</button>
+<button class="inline-flex items-center gap-1.5 h-9 px-3.5 bg-[#a78bfa] hover:bg-[#c4b5fd] text-[#0a0012] rounded-lg font-semibold text-xs tracking-tight transition-colors shadow-sm" onclick="setDrawerDate('2026-10-20', 'Tuesday, Oct 20')" type="button">
+<span class="material-symbols-outlined text-base">add</span>
+<span>Add Time</span>
+</button>
+</div>
+</header>
+<!-- Timesheet Main Body -->
+<main class="p-4 md:p-6 flex flex-col gap-5 max-w-[1720px] w-full mx-auto">
+<!-- Week Range Navigator & Control Strip -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#131825] border border-[#232b3e] p-4 rounded-xl shadow-sm">
+<div class="flex flex-wrap items-center gap-3 md:gap-4">
+<!-- Prev / Next Week Selector -->
+<div class="flex items-center gap-1 bg-[#0e121b] border border-[#232b3e] p-1 rounded-lg">
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors flex items-center" title="Previous Week" type="button">
+<span class="material-symbols-outlined text-base">chevron_left</span>
+</button>
+<div class="flex items-center gap-2 px-2">
+<span class="material-symbols-outlined text-base text-[#a78bfa]">calendar_today</span>
+<span class="text-sm font-semibold text-[#f1f5f9] tracking-tight">Week 43: Oct 19, 2026 – Oct 25, 2026</span>
+</div>
+<button class="p-1 rounded text-[#94a3b8] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors flex items-center" title="Next Week" type="button">
+<span class="material-symbols-outlined text-base">chevron_right</span>
+</button>
+</div>
+<!-- Status badge & Lock cutoff -->
+<div class="flex items-center gap-2.5">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#34d399]/15 border border-[#34d399]/30 text-[#34d399] rounded-full text-xs font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-[#34d399]"></span>
+              Open
+            </span>
+<span class="text-xs font-mono text-[#64748b]">Lock cutoff: Sun 23:59 GMT</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-2.5 flex-wrap">
+<button class="inline-flex items-center gap-1.5 h-9 px-3.5 bg-[#171d2d] hover:bg-[#1f273d] text-[#f1f5f9] border border-[#232b3e] rounded-lg text-xs font-medium transition-colors" id="closeWeekBtn" onclick="toggleCloseWeek()" type="button">
+<span class="material-symbols-outlined text-base text-[#94a3b8]">lock</span>
+<span id="closeWeekLabel">Close Week</span>
+</button>
+<button class="inline-flex items-center gap-2 h-9 px-4 bg-[#7c3aed] hover:bg-[#6d28d9] text-white rounded-lg text-xs font-semibold transition-all shadow-sm group" type="button">
+<span class="material-symbols-outlined text-base group-hover:rotate-12 transition-transform">receipt_long</span>
+<span>Generate Invoices from Week</span>
+</button>
+</div>
+</div>
+<!-- Intelligent Threshold Alert Banner (Obsidian Dark Styled) -->
+<div class="bg-[#171d2d] border border-[#fbbf24]/30 rounded-xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
+<div class="absolute -left-12 -top-12 w-32 h-32 bg-[#fbbf24]/5 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-start gap-3.5 relative z-10">
+<div class="w-9 h-9 rounded-lg bg-[#fbbf24]/15 border border-[#fbbf24]/30 flex items-center justify-center text-[#fbbf24] shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+<div>
+<div class="flex items-center gap-2.5 flex-wrap">
+<h2 class="text-sm font-semibold text-[#f1f5f9]">34.5 / 40.0 hrs logged this week</h2>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] bg-[#fbbf24]/15 border border-[#fbbf24]/30 text-[#fbbf24] font-medium font-mono">
+                -5.5 hrs below target
+              </span>
+</div>
+<p class="text-xs text-[#94a3b8] mt-1">
+              Billable: <span class="font-mono font-medium text-[#f1f5f9]">34.5 hrs</span> • Non-billable: <span class="font-mono font-medium text-[#64748b]">0.0 hrs</span> • Projected Value: <span class="font-mono font-bold text-[#34d399]">$4,312.50</span>
+</p>
+</div>
+</div>
+<!-- Linear Progress Indicator -->
+<div class="w-full md:w-80 flex flex-col gap-1.5 shrink-0 relative z-10">
+<div class="flex justify-between items-center font-mono text-xs text-[#94a3b8]">
+<span>Weekly Target Progress</span>
+<span class="font-semibold text-[#f1f5f9]">86.25%</span>
+</div>
+<div class="w-full h-2 bg-[#0e121b] border border-[#232b3e] rounded-full overflow-hidden flex">
+<div class="h-full bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] rounded-full transition-all duration-500" style="width: 86.25%"></div>
+</div>
+<div class="flex justify-between font-mono text-[10px] text-[#64748b]">
+<span>0h</span>
+<span class="text-[#34d399] font-medium">34.5h actual</span>
+<span>40.0h goal</span>
+</div>
+</div>
+</div>
+<!-- Main Workspace: 7-Day Calendar Matrix & Quick Add Drawer -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+<!-- 7-Day Calendar Grid -->
+<div class="xl:col-span-8 2xl:col-span-9 flex flex-col gap-3 overflow-x-auto pb-2">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 min-w-[840px] lg:min-w-0">
+<!-- Monday Oct 19 -->
+<div class="flex flex-col bg-[#131825] border border-[#232b3e] rounded-xl overflow-hidden flex-1 min-w-0">
+<div class="p-2.5 bg-[#0e121b] border-b border-[#232b3e] flex items-center justify-between">
+<div>
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Mon</span>
+<span class="text-sm font-semibold text-[#f1f5f9]">Oct 19</span>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-semibold text-[#a78bfa] block">7.5h</span>
+<span class="font-mono text-[10px] text-[#64748b]">$975.00</span>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2.5 flex-grow">
+<!-- Mon Card 1 -->
+<div class="p-2.5 rounded-lg bg-[#171d2d] border border-[#232b3e] hover:border-[#a78bfa]/40 transition-colors shadow-sm flex flex-col gap-1.5 group cursor-pointer relative">
+<div class="w-1 h-full absolute left-0 top-0 bottom-0 bg-[#34d399] rounded-l-lg"></div>
+<div class="flex items-center justify-between gap-1 pl-1.5">
+<span class="text-[10px] text-[#34d399] bg-[#34d399]/15 border border-[#34d399]/30 px-1.5 py-0.5 rounded font-medium truncate">Acme Corp</span>
+<span class="font-mono text-xs font-bold text-[#f1f5f9] shrink-0">5.5h</span>
+</div>
+<span class="text-xs text-[#f1f5f9] font-medium pl-1.5 truncate">E-Commerce Storefront</span>
+<p class="text-[11px] text-[#94a3b8] pl-1.5 line-clamp-2 leading-relaxed">Implemented Stripe billing checkout integration and unit tests</p>
+<div class="flex items-center justify-between text-[11px] text-[#64748b] font-mono pl-1.5 pt-1 border-t border-[#232b3e]/60">
+<span>$130/hr</span>
+<span class="text-[#f1f5f9] font-medium">$715.00</span>
+</div>
+</div>
+<!-- Mon Card 2 -->
+<div class="p-2.5 rounded-lg bg-[#171d2d] border border-[#232b3e] hover:border-[#a78bfa]/40 transition-colors shadow-sm flex flex-col gap-1.5 group cursor-pointer relative">
+<div class="w-1 h-full absolute left-0 top-0 bottom-0 bg-[#34d399] rounded-l-lg"></div>
+<div class="flex items-center justify-between gap-1 pl-1.5">
+<span class="text-[10px] text-[#34d399] bg-[#34d399]/15 border border-[#34d399]/30 px-1.5 py-0.5 rounded font-medium truncate">Acme Corp</span>
+<span class="font-mono text-xs font-bold text-[#f1f5f9] shrink-0">2.0h</span>
+</div>
+<span class="text-xs text-[#f1f5f9] font-medium pl-1.5 truncate">API Microservice</span>
+<p class="text-[11px] text-[#94a3b8] pl-1.5 line-clamp-2 leading-relaxed">Database schema migrations for webhook events</p>
+<div class="flex items-center justify-between text-[11px] text-[#64748b] font-mono pl-1.5 pt-1 border-t border-[#232b3e]/60">
+<span>$130/hr</span>
+<span class="text-[#f1f5f9] font-medium">$260.00</span>
+</div>
+</div>
+<!-- Mon Quick Add Button -->
+<button class="w-full py-2 mt-auto text-center rounded-lg hover:bg-[#171d2d] text-xs text-[#a78bfa] flex items-center justify-center gap-1 transition-colors border border-dashed border-[#232b3e]" onclick="setDrawerDate('2026-10-19', 'Monday, Oct 19')" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add record</span>
+</button>
+</div>
+</div>
+<!-- Tuesday Oct 20 (Target 8.0h reached - Highlighted Active Day) -->
+<div class="flex flex-col bg-[#131825] border-2 border-[#a78bfa] rounded-xl overflow-hidden flex-1 min-w-0 shadow-lg shadow-[#a78bfa]/5">
+<div class="p-2.5 bg-[#a78bfa]/15 border-b border-[#a78bfa]/30 flex items-center justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[10px] text-[#a78bfa] font-bold uppercase tracking-wider block">Tue</span>
+<span class="w-1.5 h-1.5 rounded-full bg-[#34d399]"></span>
+</div>
+<span class="text-sm font-bold text-[#f1f5f9]">Oct 20</span>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-bold text-[#34d399] block">8.0h</span>
+<span class="font-mono text-[10px] text-[#94a3b8]">$920.00</span>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2.5 flex-grow">
+<!-- Tue Card 1 -->
+<div class="p-2.5 rounded-lg bg-[#171d2d] border border-[#a78bfa]/30 hover:border-[#a78bfa] transition-colors shadow-sm flex flex-col gap-1.5 group cursor-pointer relative">
+<div class="w-1 h-full absolute left-0 top-0 bottom-0 bg-[#a78bfa] rounded-l-lg"></div>
+<div class="flex items-center justify-between gap-1 pl-1.5">
+<span class="text-[10px] text-[#a78bfa] bg-[#a78bfa]/15 border border-[#a78bfa]/30 px-1.5 py-0.5 rounded font-medium truncate">Starlight Media</span>
+<span class="font-mono text-xs font-bold text-[#f1f5f9] shrink-0">8.0h</span>
+</div>
+<span class="text-xs text-[#f1f5f9] font-medium pl-1.5 truncate">Video Streaming App</span>
+<p class="text-[11px] text-[#94a3b8] pl-1.5 line-clamp-3 leading-relaxed">Refactored HLS media player and buffer logic</p>
+<div class="flex items-center gap-1 pl-1.5 text-[10px] text-[#a78bfa]">
+<span class="material-symbols-outlined text-xs">tune</span>
+<span class="font-medium">Custom project rate applied</span>
+</div>
+<div class="flex items-center justify-between text-[11px] text-[#64748b] font-mono pl-1.5 pt-1 border-t border-[#232b3e]/60">
+<span>$115/hr <del class="text-[10px] text-[#64748b]/60">$100</del></span>
+<span class="text-[#34d399] font-bold">$920.00</span>
+</div>
+</div>
+<!-- Active Editing Indicator -->
+<div class="p-2 rounded-lg bg-[#a78bfa]/10 border border-[#a78bfa]/30 text-[#a78bfa] text-[11px] flex items-center justify-between">
+<span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#a78bfa] animate-ping"></span> Editing in Drawer</span>
+<span class="material-symbols-outlined text-sm">edit_note</span>
+</div>
+<!-- Tue Add Record -->
+<button class="w-full py-2 mt-auto text-center rounded-lg bg-[#a78bfa]/15 hover:bg-[#a78bfa]/25 text-xs text-[#a78bfa] font-semibold flex items-center justify-center gap-1 transition-colors border border-[#a78bfa]/30" onclick="setDrawerDate('2026-10-20', 'Tuesday, Oct 20')" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add record</span>
+</button>
+</div>
+</div>
+<!-- Wednesday Oct 21 -->
+<div class="flex flex-col bg-[#131825] border border-[#232b3e] rounded-xl overflow-hidden flex-1 min-w-0">
+<div class="p-2.5 bg-[#0e121b] border-b border-[#232b3e] flex items-center justify-between">
+<div>
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Wed</span>
+<span class="text-sm font-semibold text-[#f1f5f9]">Oct 21</span>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-semibold text-[#a78bfa] block">7.0h</span>
+<span class="font-mono text-[10px] text-[#64748b]">$822.50</span>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2.5 flex-grow">
+<!-- Wed Card 1 -->
+<div class="p-2.5 rounded-lg bg-[#171d2d] border border-[#232b3e] hover:border-[#a78bfa]/40 transition-colors shadow-sm flex flex-col gap-1.5 group cursor-pointer relative">
+<div class="w-1 h-full absolute left-0 top-0 bottom-0 bg-[#34d399] rounded-l-lg"></div>
+<div class="flex items-center justify-between gap-1 pl-1.5">
+<span class="text-[10px] text-[#34d399] bg-[#34d399]/15 border border-[#34d399]/30 px-1.5 py-0.5 rounded font-medium truncate">Acme Corp</span>
+<span class="font-mono text-xs font-bold text-[#f1f5f9] shrink-0">4.5h</span>
+</div>
+<span class="text-xs text-[#f1f5f9] font-medium pl-1.5 truncate">E-Commerce Storefront</span>
+<p class="text-[11px] text-[#94a3b8] pl-1.5 line-clamp-2 leading-relaxed">Cart abandonment analytics setup and bug fixes</p>
+<div class="flex items-center justify-between text-[11px] text-[#64748b] font-mono pl-1.5 pt-1 border-t border-[#232b3e]/60">
+<span>$130/hr</span>
+<span class="text-[#f1f5f9] font-medium">$585.00</span>
+</div>
+</div>
+<!-- Wed Card 2 (Standalone Project) -->
+<div class="p-2.5 rounded-lg bg-[#171d2d] border border-[#232b3e] hover:border-[#a78bfa]/40 transition-colors shadow-sm flex flex-col gap-1.5 group cursor-pointer relative">
+<div class="w-1 h-full absolute left-0 top-0 bottom-0 bg-[#64748b] rounded-l-lg"></div>
+<div class="flex items-center justify-between gap-1 pl-1.5">
+<span class="text-[10px] text-[#94a3b8] bg-[#232b3e] px-1.5 py-0.5 rounded font-medium truncate">Standalone</span>
+<span class="font-mono text-xs font-bold text-[#f1f5f9] shrink-0">2.5h</span>
+</div>
+<span class="text-xs text-[#f1f5f9] font-medium pl-1.5 truncate">Internal Tools &amp; Portfolio</span>
+<p class="text-[11px] text-[#94a3b8] pl-1.5 line-clamp-2 leading-relaxed">Built client presentation slides &amp; case study</p>
+<div class="flex items-center justify-between text-[11px] text-[#64748b] font-mono pl-1.5 pt-1 border-t border-[#232b3e]/60">
+<span>$95/hr</span>
+<span class="text-[#f1f5f9] font-medium">$237.50</span>
+</div>
+</div>
+<!-- Wed Add Record -->
+<button class="w-full py-2 mt-auto text-center rounded-lg hover:bg-[#171d2d] text-xs text-[#a78bfa] flex items-center justify-center gap-1 transition-colors border border-dashed border-[#232b3e]" onclick="setDrawerDate('2026-10-21', 'Wednesday, Oct 21')" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add record</span>
+</button>
+</div>
+</div>
+<!-- Thursday Oct 22 -->
+<div class="flex flex-col bg-[#131825] border border-[#232b3e] rounded-xl overflow-hidden flex-1 min-w-0">
+<div class="p-2.5 bg-[#0e121b] border-b border-[#232b3e] flex items-center justify-between">
+<div>
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Thu</span>
+<span class="text-sm font-semibold text-[#f1f5f9]">Oct 22</span>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-semibold text-[#a78bfa] block">6.5h</span>
+<span class="font-mono text-[10px] text-[#64748b]">$747.50</span>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2.5 flex-grow">
+<!-- Thu Card 1 -->
+<div class="p-2.5 rounded-lg bg-[#171d2d] border border-[#232b3e] hover:border-[#a78bfa]/40 transition-colors shadow-sm flex flex-col gap-1.5 group cursor-pointer relative">
+<div class="w-1 h-full absolute left-0 top-0 bottom-0 bg-[#a78bfa] rounded-l-lg"></div>
+<div class="flex items-center justify-between gap-1 pl-1.5">
+<span class="text-[10px] text-[#a78bfa] bg-[#a78bfa]/15 border border-[#a78bfa]/30 px-1.5 py-0.5 rounded font-medium truncate">Starlight Media</span>
+<span class="font-mono text-xs font-bold text-[#f1f5f9] shrink-0">6.5h</span>
+</div>
+<span class="text-xs text-[#f1f5f9] font-medium pl-1.5 truncate">Video Streaming App</span>
+<p class="text-[11px] text-[#94a3b8] pl-1.5 line-clamp-2 leading-relaxed">Push notification integration with Firebase</p>
+<div class="flex items-center justify-between text-[11px] text-[#64748b] font-mono pl-1.5 pt-1 border-t border-[#232b3e]/60">
+<span>$115/hr</span>
+<span class="text-[#f1f5f9] font-medium">$747.50</span>
+</div>
+</div>
+<!-- Thu Add Record -->
+<button class="w-full py-2 mt-auto text-center rounded-lg hover:bg-[#171d2d] text-xs text-[#a78bfa] flex items-center justify-center gap-1 transition-colors border border-dashed border-[#232b3e]" onclick="setDrawerDate('2026-10-22', 'Thursday, Oct 22')" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add record</span>
+</button>
+</div>
+</div>
+<!-- Friday Oct 23 -->
+<div class="flex flex-col bg-[#131825] border border-[#232b3e] rounded-xl overflow-hidden flex-1 min-w-0">
+<div class="p-2.5 bg-[#0e121b] border-b border-[#232b3e] flex items-center justify-between">
+<div>
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Fri</span>
+<span class="text-sm font-semibold text-[#f1f5f9]">Oct 23</span>
+</div>
+<div class="text-right">
+<span class="font-mono text-xs font-semibold text-[#a78bfa] block">5.5h</span>
+<span class="font-mono text-[10px] text-[#64748b]">$715.00</span>
+</div>
+</div>
+<div class="p-2.5 flex flex-col gap-2.5 flex-grow">
+<!-- Fri Card 1 -->
+<div class="p-2.5 rounded-lg bg-[#171d2d] border border-[#232b3e] hover:border-[#a78bfa]/40 transition-colors shadow-sm flex flex-col gap-1.5 group cursor-pointer relative">
+<div class="w-1 h-full absolute left-0 top-0 bottom-0 bg-[#34d399] rounded-l-lg"></div>
+<div class="flex items-center justify-between gap-1 pl-1.5">
+<span class="text-[10px] text-[#34d399] bg-[#34d399]/15 border border-[#34d399]/30 px-1.5 py-0.5 rounded font-medium truncate">Acme Corp</span>
+<span class="font-mono text-xs font-bold text-[#f1f5f9] shrink-0">5.5h</span>
+</div>
+<span class="text-xs text-[#f1f5f9] font-medium pl-1.5 truncate">E-Commerce Storefront</span>
+<p class="text-[11px] text-[#94a3b8] pl-1.5 line-clamp-2 leading-relaxed">Sprint demo, client review &amp; staging deployment</p>
+<div class="flex items-center justify-between text-[11px] text-[#64748b] font-mono pl-1.5 pt-1 border-t border-[#232b3e]/60">
+<span>$130/hr</span>
+<span class="text-[#f1f5f9] font-medium">$715.00</span>
+</div>
+</div>
+<!-- Fri Add Record -->
+<button class="w-full py-2 mt-auto text-center rounded-lg hover:bg-[#171d2d] text-xs text-[#a78bfa] flex items-center justify-center gap-1 transition-colors border border-dashed border-[#232b3e]" onclick="setDrawerDate('2026-10-23', 'Friday, Oct 23')" type="button">
+<span class="material-symbols-outlined text-sm">add</span>
+<span>Add record</span>
+</button>
+</div>
+</div>
+<!-- Saturday Oct 24 (Weekend) -->
+<div class="flex flex-col bg-[#0e121b]/80 border-2 border-dashed border-[#232b3e] rounded-xl overflow-hidden flex-1 min-w-0">
+<div class="p-2.5 bg-[#0e121b] border-b border-[#232b3e]/60 flex items-center justify-between opacity-80">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Sat</span>
+<span class="text-[9px] text-[#94a3b8] bg-[#171d2d] px-1 py-0.2 rounded">Weekend</span>
+</div>
+<span class="text-sm font-medium text-[#94a3b8]">Oct 24</span>
+</div>
+<span class="font-mono text-xs text-[#64748b]">0.0h</span>
+</div>
+<div class="p-3 flex flex-col items-center justify-center gap-2 flex-grow text-center min-h-[160px]">
+<span class="material-symbols-outlined text-2xl text-[#333f56]">weekend</span>
+<p class="text-xs text-[#64748b]">No active time entries</p>
+<button class="mt-2 w-full py-1.5 px-2 bg-[#131825] hover:bg-[#171d2d] hover:text-[#a78bfa] text-[#94a3b8] border border-[#232b3e] rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1" onclick="setDrawerDate('2026-10-24', 'Saturday, Oct 24')" type="button">
+<span class="material-symbols-outlined text-xs">add</span>
+<span>Log Weekend</span>
+</button>
+</div>
+</div>
+<!-- Sunday Oct 25 (Weekend) -->
+<div class="flex flex-col bg-[#0e121b]/80 border-2 border-dashed border-[#232b3e] rounded-xl overflow-hidden flex-1 min-w-0">
+<div class="p-2.5 bg-[#0e121b] border-b border-[#232b3e]/60 flex items-center justify-between opacity-80">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Sun</span>
+<span class="text-[9px] text-[#94a3b8] bg-[#171d2d] px-1 py-0.2 rounded">Weekend</span>
+</div>
+<span class="text-sm font-medium text-[#94a3b8]">Oct 25</span>
+</div>
+<span class="font-mono text-xs text-[#64748b]">0.0h</span>
+</div>
+<div class="p-3 flex flex-col items-center justify-center gap-2 flex-grow text-center min-h-[160px]">
+<span class="material-symbols-outlined text-2xl text-[#333f56]">weekend</span>
+<p class="text-xs text-[#64748b]">No active time entries</p>
+<button class="mt-2 w-full py-1.5 px-2 bg-[#131825] hover:bg-[#171d2d] hover:text-[#a78bfa] text-[#94a3b8] border border-[#232b3e] rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1" onclick="setDrawerDate('2026-10-25', 'Sunday, Oct 25')" type="button">
+<span class="material-symbols-outlined text-xs">add</span>
+<span>Log Weekend</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Per-day Quick Add Record Drawer / Panel -->
+<div class="xl:col-span-4 2xl:col-span-3 bg-[#131825] border border-[#232b3e] rounded-xl shadow-xl p-5 flex flex-col gap-4" id="quickAddDrawer">
+<div class="flex items-center justify-between border-b border-[#232b3e] pb-3">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-[#a78bfa]/15 border border-[#a78bfa]/30 flex items-center justify-center text-[#a78bfa]">
+<span class="material-symbols-outlined text-lg">edit_calendar</span>
+</div>
+<div>
+<h3 class="text-sm font-bold text-[#f1f5f9] tracking-tight">Quick Add Record</h3>
+<p class="text-xs text-[#94a3b8]" id="drawerDayLabel">Tuesday, Oct 20, 2026</p>
+</div>
+</div>
+<button class="p-1 rounded-lg text-[#64748b] hover:text-[#f1f5f9] hover:bg-[#171d2d] transition-colors" onclick="resetDrawerForm()" type="button">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-3.5" id="recordForm" onsubmit="event.preventDefault(); handleSaveRecord();">
+<!-- Date Picker -->
+<div class="flex flex-col gap-1.5">
+<label class="text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider" for="recordDate">Date</label>
+<div class="relative">
+<input class="w-full h-9 px-3 bg-[#0e121b] border border-[#232b3e] rounded-lg text-[#f1f5f9] font-mono text-xs focus:outline-none focus:border-[#a78bfa] focus:ring-1 focus:ring-[#a78bfa] transition-all" id="recordDate" type="date" value="2026-10-20"/>
+</div>
+</div>
+<!-- Client Dropdown -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<label class="text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider" for="clientSelect">Client</label>
+<span class="text-[11px] text-[#a78bfa] font-medium cursor-pointer hover:underline">+ New Client</span>
+</div>
+<select class="w-full h-9 px-3 bg-[#0e121b] border border-[#232b3e] rounded-lg text-[#f1f5f9] text-xs focus:outline-none focus:border-[#a78bfa] focus:ring-1 focus:ring-[#a78bfa] transition-all" id="clientSelect" onchange="handleClientChange(this.value)">
+<option value="acme">Acme Corp ($130.00/hr default)</option>
+<option selected="" value="starlight">Starlight Media ($100.00/hr default)</option>
+<option value="none">None (Standalone / Internal)</option>
+</select>
+</div>
+<!-- Project Dropdown -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<label class="text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider" for="projectSelect">Project</label>
+<span class="text-[10px] bg-[#a78bfa]/15 border border-[#a78bfa]/30 text-[#a78bfa] px-1.5 py-0.5 rounded font-mono" id="rateOverrideBadge">Rate: $115.00/hr</span>
+</div>
+<select class="w-full h-9 px-3 bg-[#0e121b] border border-[#232b3e] rounded-lg text-[#f1f5f9] text-xs focus:outline-none focus:border-[#a78bfa] focus:ring-1 focus:ring-[#a78bfa] transition-all" id="projectSelect">
+<option selected="" value="proj_stream">Video Streaming Mobile App</option>
+<option value="proj_ott">Connected TV Architecture</option>
+</select>
+</div>
+<!-- Hours Worked & Estimated Total -->
+<div class="grid grid-cols-2 gap-3">
+<div class="flex flex-col gap-1.5">
+<label class="text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider" for="hoursInput">Hours Worked</label>
+<div class="relative flex items-center">
+<input class="w-full h-9 pl-3 pr-8 bg-[#0e121b] border border-[#232b3e] rounded-lg text-[#f1f5f9] font-mono text-xs focus:outline-none focus:border-[#a78bfa] focus:ring-1 focus:ring-[#a78bfa] font-semibold transition-all" id="hoursInput" max="24" min="0.25" oninput="updateProjectedSubtotal()" step="0.25" type="number" value="8.0"/>
+<span class="absolute right-2.5 font-mono text-xs text-[#64748b] pointer-events-none">hrs</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider">Estimated Total</label>
+<div class="h-9 px-3 bg-[#0e121b] border border-[#232b3e] rounded-lg flex items-center justify-between">
+<span class="text-[11px] text-[#64748b]">Billable</span>
+<span class="font-mono text-xs font-bold text-[#34d399]" id="calculatedSubtotal">$920.00</span>
+</div>
+</div>
+</div>
+<!-- Description Textarea -->
+<div class="flex flex-col gap-1.5">
+<label class="text-[11px] font-semibold text-[#94a3b8] uppercase tracking-wider" for="descriptionInput">Work Description</label>
+<textarea class="w-full p-2.5 bg-[#0e121b] border border-[#232b3e] rounded-lg text-[#f1f5f9] text-xs focus:outline-none focus:border-[#a78bfa] focus:ring-1 focus:ring-[#a78bfa] resize-none leading-relaxed" id="descriptionInput" placeholder="Provide details on deliverables, features, or sprint tasks..." rows="3">Refactored HLS media player and buffer logic</textarea>
+</div>
+<!-- Billable Toggle / Category Metadata -->
+<div class="p-2.5 bg-[#0e121b] border border-[#232b3e] rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-2">
+<input checked="" class="w-4 h-4 rounded bg-[#171d2d] border-[#232b3e] text-[#a78bfa] focus:ring-[#a78bfa] focus:ring-offset-[#0e121b]" id="billableCheck" type="checkbox"/>
+<label class="text-xs text-[#f1f5f9] cursor-pointer select-none" for="billableCheck">Billable to Client</label>
+</div>
+<span class="text-[11px] text-[#34d399] font-medium font-mono">100% Rate</span>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-2 pt-2 border-t border-[#232b3e]">
+<button class="px-3.5 h-9 rounded-lg hover:bg-[#171d2d] text-[#94a3b8] hover:text-[#f1f5f9] text-xs font-medium transition-colors" onclick="resetDrawerForm()" type="button">
+                Cancel
+              </button>
+<button class="inline-flex items-center gap-1.5 px-4 h-9 bg-[#a78bfa] hover:bg-[#c4b5fd] text-[#0a0012] rounded-lg text-xs font-bold transition-all shadow-sm" type="submit">
+<span class="material-symbols-outlined text-base">check</span>
+<span>Save Record</span>
+</button>
+</div>
+</form>
+<!-- Assistant Tip -->
+<div class="bg-[#0e121b] border border-[#232b3e] p-3 rounded-lg flex items-start gap-2 text-[#94a3b8] text-[11px] leading-relaxed">
+<span class="material-symbols-outlined text-sm text-[#a78bfa] shrink-0 mt-0.5">info</span>
+<span>Tip: Hours sync instantly with active client agreements. Custom overrides will appear highlighted on generated invoices.</span>
+</div>
+</div>
+</div>
+<!-- Bottom Summary Metrics Strip -->
+<div class="bg-[#131825] border border-[#232b3e] rounded-xl p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex flex-wrap items-center gap-6 w-full md:w-auto">
+<!-- Logged Hours -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#a78bfa]/15 border border-[#a78bfa]/30 flex items-center justify-center text-[#a78bfa] shrink-0">
+<span class="material-symbols-outlined text-xl">timer</span>
+</div>
+<div>
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Logged Hours</span>
+<div class="flex items-baseline gap-1.5">
+<span class="text-xl font-bold text-[#f1f5f9] font-mono">34.5</span>
+<span class="text-xs text-[#94a3b8] font-mono">/ 40.0 hrs</span>
+</div>
+</div>
+</div>
+<div class="h-8 w-px bg-[#232b3e] hidden sm:block"></div>
+<!-- Gross Unbilled Value -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#34d399]/15 border border-[#34d399]/30 flex items-center justify-center text-[#34d399] shrink-0">
+<span class="material-symbols-outlined text-xl">payments</span>
+</div>
+<div>
+<span class="text-[10px] text-[#64748b] uppercase tracking-wider font-semibold block">Gross Unbilled Value</span>
+<span class="text-xl font-bold text-[#34d399] font-mono">$4,312.50</span>
+</div>
+</div>
+<div class="h-8 w-px bg-[#232b3e] hidden lg:block"></div>
+<!-- Category Breakdown -->
+<div class="flex items-center gap-4 text-xs text-[#94a3b8]">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#a78bfa]"></span>
+<span><strong class="text-[#f1f5f9] font-semibold">2</strong> Clients</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#34d399]"></span>
+<span><strong class="text-[#f1f5f9] font-semibold">3</strong> Client Projects</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#64748b]"></span>
+<span><strong class="text-[#f1f5f9] font-semibold">1</strong> Standalone Project</span>
+</div>
+</div>
+</div>
+<!-- Export & Print Actions -->
+<div class="flex items-center gap-2 w-full md:w-auto justify-end">
+<button class="h-9 px-3.5 bg-[#0e121b] border border-[#232b3e] hover:bg-[#171d2d] text-[#f1f5f9] rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-base text-[#94a3b8]">file_download</span>
+<span>Export CSV</span>
+</button>
+<button class="h-9 px-3.5 bg-[#0e121b] border border-[#232b3e] hover:bg-[#171d2d] text-[#f1f5f9] rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5" type="button">
+<span class="material-symbols-outlined text-base text-[#94a3b8]">print</span>
+<span>Print Summary</span>
+</button>
+</div>
+</div>
+</main>
+</div>
+<script>
+    function setDrawerDate(isoDate, displayStr) {
+      const dateInput = document.getElementById('recordDate');
+      const label = document.getElementById('drawerDayLabel');
+      if (dateInput) dateInput.value = isoDate;
+      if (label) label.textContent = displayStr + ', 2026';
+      
+      const drawer = document.getElementById('quickAddDrawer');
+      if (drawer && window.innerWidth < 1280) {
+        drawer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function handleClientChange(val) {
+      const projSelect = document.getElementById('projectSelect');
+      const rateBadge = document.getElementById('rateOverrideBadge');
+      if (!projSelect || !rateBadge) return;
+
+      if (val === 'acme') {
+        projSelect.innerHTML = `
+          <option value="proj_store">E-Commerce Storefront</option>
+          <option value="proj_micro">API Microservice</option>
+        `;
+        rateBadge.textContent = 'Rate: $130.00/hr';
+      } else if (val === 'starlight') {
+        projSelect.innerHTML = `
+          <option value="proj_stream" selected>Video Streaming Mobile App</option>
+          <option value="proj_ott">Connected TV Architecture</option>
+        `;
+        rateBadge.textContent = 'Rate: $115.00/hr (Custom)';
+      } else {
+        projSelect.innerHTML = `
+          <option value="proj_internal">Internal Tools & Portfolio</option>
+          <option value="proj_r_d">Engineering R&D</option>
+        `;
+        rateBadge.textContent = 'Rate: $95.00/hr';
+      }
+      updateProjectedSubtotal();
+    }
+
+    function updateProjectedSubtotal() {
+      const hours = parseFloat(document.getElementById('hoursInput')?.value || 0);
+      const client = document.getElementById('clientSelect')?.value;
+      let rate = 130;
+      if (client === 'starlight') rate = 115;
+      if (client === 'none') rate = 95;
+
+      const subtotal = hours * rate;
+      const target = document.getElementById('calculatedSubtotal');
+      if (target) {
+        target.textContent = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }
+
+    let isWeekClosed = false;
+    function toggleCloseWeek() {
+      isWeekClosed = !isWeekClosed;
+      const btn = document.getElementById('closeWeekBtn');
+      const label = document.getElementById('closeWeekLabel');
+      if (!btn || !label) return;
+
+      if (isWeekClosed) {
+        label.textContent = 'Reopen Week';
+        btn.classList.add('bg-[#ef4444]/20', 'text-[#ef4444]', 'border-[#ef4444]/40');
+      } else {
+        label.textContent = 'Close Week';
+        btn.classList.remove('bg-[#ef4444]/20', 'text-[#ef4444]', 'border-[#ef4444]/40');
+      }
+    }
+
+    function resetDrawerForm() {
+      const form = document.getElementById('recordForm');
+      if (form) form.reset();
+      handleClientChange('starlight');
+      const hoursInput = document.getElementById('hoursInput');
+      if (hoursInput) hoursInput.value = '8.0';
+      updateProjectedSubtotal();
+    }
+
+    function handleSaveRecord() {
+      const saveBtn = document.querySelector('#recordForm button[type="submit"]');
+      if (saveBtn) {
+        const orig = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">refresh</span><span>Saving...</span>';
+        setTimeout(() => {
+          saveBtn.innerHTML = '<span class="material-symbols-outlined text-base">check_circle</span><span>Saved!</span>';
+          setTimeout(() => {
+            saveBtn.innerHTML = orig;
+          }, 1200);
+        }, 500);
+      }
+    }
+  </script>
+</body></html>

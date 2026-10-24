@@ -1,0 +1,17 @@
+{
+  "name": "billflow-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright E2E suite for BillFlow (freelancer-invoices) — critical-flow QA wave T10",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "install-browsers": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "typescript": "^5.9.0"
+  }
+}
