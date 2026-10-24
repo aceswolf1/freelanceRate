@@ -5,7 +5,7 @@ import { closeDb } from './db/client.js';
 
 const app = createApp();
 
-const server = app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, process.env.HOST ?? '127.0.0.1', () => {
   logger.info({ port: env.PORT, env: env.NODE_ENV }, 'API listening');
 });
 

@@ -23,7 +23,8 @@ export function createApp(): Express {
       methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     }),
   );
-  app.use(express.json({ limit: '1mb' }));
+  // inflate:false rejects compressed bodies (415) — Node2Shell (CVE-2026-111497) stop-gap.
+  app.use(express.json({ limit: '1mb', inflate: false }));
 
   if (env.NODE_ENV !== 'test') {
     app.use(

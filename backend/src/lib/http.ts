@@ -152,6 +152,10 @@ export const errorMiddleware: ErrorRequestHandler = (error, _req, res, _next) =>
     res.status(413).json(fail('VALIDATION_ERROR', 'Request body is too large'));
     return;
   }
+  if (candidate?.type === 'encoding.unsupported') {
+    res.status(415).json(fail('VALIDATION_ERROR', 'Compressed request bodies are not accepted'));
+    return;
+  }
   res.status(500).json(fail('INTERNAL', 'Internal server error'));
 };
 
