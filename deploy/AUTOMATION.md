@@ -21,7 +21,7 @@ NAS Watchtower  ──▶  new :latest digest?  ──▶  pull + recreate backe
 - `ghcr.io/aceswolf1/freelancer-invoices-backend`
 - `ghcr.io/aceswolf1/freelancer-invoices-frontend`
 
-**Network shape:** only the frontend is published (NAS port `3002`). The
+**Network shape:** only the frontend is published (NAS port `3010`). The
 browser calls same-origin `/api`, and the frontend proxies it to the backend on
 the app's internal network. The API and Postgres are never exposed, and there's no
 CORS or API URL to configure for the NAS hostname.
@@ -88,10 +88,11 @@ published. When it's green, each image has `:0.1.0`, `:0.1` and `:latest`.
    - `CHANGE_ME_DB_PASSWORD` → a strong URL-safe password, in **both** places
      (`db` and the backend's `DATABASE_URL`). Never commit the real value.
    - `TZ` if you're not on `America/Chicago`.
-   - `"3002:3000"` if NAS port 3002 is taken.
+   - `"3010:3000"` if NAS port 3010 is taken. Change **only the left number**:
+     `PORT` and the right side of `ports:` must both stay `3000`.
    - the `/mnt/storage/...` path if your pool differs.
 3. Deploy. The backend applies database migrations on start. Open
-   `http://<nas>:3002`.
+   `http://<nas>:3010` (e.g. `http://192.168.18.10:3010`).
 
 ### Moving your existing data to the NAS (optional)
 
@@ -162,6 +163,9 @@ the schema.
 | Postgres `permission denied` on `pgdata` | Dataset ACL blocks the container's chown | Use a dataset with the **Apps** preset, or give the dataset to uid/gid `70` (postgres in alpine) |
 | Backend unhealthy, log `password authentication failed` | Password differs between `db` and `DATABASE_URL` | Use the same value in both places |
 | Week rolls over early in the evening | `TZ` not set | Set `TZ` on all three services |
+| Deploy fails: `Bind for 0.0.0.0:3010 failed: port is already allocated` | Another app uses that NAS port | Change the left number of the frontend's `ports:` to a free port |
+| App "Running" + frontend healthy, but the browser gets `ERR_CONNECTION_REFUSED` | Frontend `PORT` was changed, so it listens on a port `ports:` doesn't forward to | Set frontend `PORT: "3000"` (check with `sudo docker logs ix-freelancer-invoices-frontend-1`: it must say `Listening on http://0.0.0.0:3000`) |
+| Backend `unhealthy` after changing the DB password | Postgres only applies the password when `pgdata` is first created | If there's no real data yet, empty `pgdata` and redeploy; otherwise change it with `ALTER USER freelancer PASSWORD '...'` |
 
 ### Tip: Docker commands on TrueNAS
 
