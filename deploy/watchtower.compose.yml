@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------------
+# Watchtower for freelancer-invoices — deploy as a SEPARATE TrueNAS Custom App.
+# Polls GHCR and recreates ONLY containers labelled
+# com.centurylinklabs.watchtower.enable=true (frontend + backend).
+# Postgres has no label and is never touched.
+#
+# If you already run a Watchtower for another app (e.g. PixelPaladin) with
+# WATCHTOWER_LABEL_ENABLE=true, you do NOT need a second one — it will pick up
+# these labelled containers too.
+# ---------------------------------------------------------------------------
+services:
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    environment:
+      WATCHTOWER_POLL_INTERVAL: "300"     # seconds
+      WATCHTOWER_LABEL_ENABLE: "true"     # only opted-in (labelled) containers
+      WATCHTOWER_CLEANUP: "true"          # remove superseded images
+      WATCHTOWER_NO_STARTUP_MESSAGE: "true"
+      TZ: "America/Chicago"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Packages are PUBLIC, so no registry credentials are needed.

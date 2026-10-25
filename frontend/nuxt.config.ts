@@ -58,8 +58,13 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Server-only: where the /api proxy forwards to (NUXT_API_INTERNAL_BASE).
+    // Docker sets http://backend:4400; local runs hit the dev API directly.
+    apiInternalBase: 'http://localhost:4400',
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE ?? 'http://localhost:4400/api',
+      // Same-origin by default: the browser calls /api on the frontend, which
+      // proxies to the backend. Override (NUXT_PUBLIC_API_BASE) only to bypass it.
+      apiBase: process.env.NUXT_PUBLIC_API_BASE ?? '/api',
     },
   },
 

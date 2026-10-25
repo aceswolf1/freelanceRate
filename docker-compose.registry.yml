@@ -1,0 +1,76 @@
+# ---------------------------------------------------------------------------
+# freelancer-invoices · DEPLOY-ONLY compose for the NAS (prebuilt GHCR images)
+#
+# Paste this into TrueNAS → Apps → Discover Apps → Custom App → Install via YAML.
+# TrueNAS Custom Apps do NOT read a .env file, so edit the values below in the
+# pasted YAML before deploying:
+#   1. CHANGE_ME_DB_PASSWORD  → a strong, URL-safe password (letters/digits/-_),
+#                                in BOTH places it appears (db + backend).
+#   2. TZ                     → your IANA timezone (drives "today" / week rollover).
+#   3. "3002:3000"            → change 3002 if that NAS port is taken.
+#   4. /mnt/storage/...       → your pool/dataset path for the database files.
+#
+# Watchtower (deploy/watchtower.compose.yml) auto-updates ONLY the services
+# labelled below — frontend and backend. Postgres is stateful and is never
+# auto-updated.
+# ---------------------------------------------------------------------------
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: freelancer
+      POSTGRES_PASSWORD: CHANGE_ME_DB_PASSWORD
+      POSTGRES_DB: freelancer_invoices
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: America/Chicago
+    volumes:
+      # Bind to a dataset so the data is covered by your snapshots/backups.
+      - /mnt/storage/freelancer-invoices/pgdata:/var/lib/postgresql/data
+    mem_limit: 512m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freelancer -d freelancer_invoices"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # NO watchtower label — never auto-update the database.
+
+  backend:
+    image: ghcr.io/aceswolf1/freelancer-invoices-backend:latest
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"   # stateless → auto-update
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "4400"
+      DATABASE_URL: postgres://freelancer:CHANGE_ME_DB_PASSWORD@db:5432/freelancer_invoices
+      RUN_MIGRATIONS: "true"
+      LOG_LEVEL: info
+      TZ: America/Chicago
+    mem_limit: 256m
+    depends_on:
+      db:
+        condition: service_healthy
+    # Healthcheck is built into the image (GET /api/health). Not published:
+    # only the frontend talks to it, over the app's internal network.
+
+  frontend:
+    image: ghcr.io/aceswolf1/freelancer-invoices-frontend:latest
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"   # stateless → auto-update
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: "3000"
+      NUXT_API_INTERNAL_BASE: http://backend:4400
+      TZ: America/Chicago
+    ports:
+      - "3002:3000"
+    mem_limit: 384m
+    depends_on:
+      backend:
+        condition: service_healthy

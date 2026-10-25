@@ -32,7 +32,12 @@ RUN npm run build
 FROM node:22-alpine AS runtime
 WORKDIR /app
 
+# HOST: the API binds 127.0.0.1 by default (hardening, see src/server.ts);
+# inside a container it must listen on all interfaces so the frontend's
+# /api proxy can reach it over the internal Docker network. Nothing publishes
+# this port — only the frontend is exposed.
 ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
     PORT=4400 \
     RUN_MIGRATIONS=true
 

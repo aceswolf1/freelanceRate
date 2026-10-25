@@ -3,22 +3,17 @@
 # freelancer-invoices · frontend image (Nuxt 4 -> .output/, nitro node-server)
 # Multi-stage: build -> runtime (only .output, non-root).
 #
-# IMPORTANT (TrueNAS / reverse-proxy setups):
-#   NUXT_PUBLIC_API_BASE is a *public* runtimeConfig value, so it is read by the
-#   browser at runtime, not by the server. It MUST be the URL the *browser* can
-#   reach — e.g. `http://truenas.local:4400/api`. Never `http://backend:4400/api`
-#   (that name only resolves inside the Compose network).
+# The browser only ever talks to this container: it calls same-origin `/api`,
+# and Nitro proxies that to the backend on the internal network
+# (NUXT_API_INTERNAL_BASE, default http://backend:4400). The API is never
+# published, so no API URL or CORS origin has to match the NAS hostname.
 # ---------------------------------------------------------------------------
 
 # --- Stage 1: build the Nuxt app -------------------------------------------
 FROM node:22-alpine AS build
 WORKDIR /app
 
-# Build-time fallback only. The real value is supplied at RUNTIME by Compose
-# (environment:) and overrides this baked-in default.
-ARG NUXT_PUBLIC_API_BASE=http://localhost:4400/api
-ENV NUXT_PUBLIC_API_BASE=${NUXT_PUBLIC_API_BASE} \
-    NITRO_PRESET=node-server
+ENV NITRO_PRESET=node-server
 
 # `npm ci` requires the lockfile; it must be committed.
 COPY package.json package-lock.json ./
@@ -38,7 +33,7 @@ ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     PORT=3000 \
     NUXT_PORT=3000 \
-    NUXT_PUBLIC_API_BASE=http://localhost:4400/api
+    NUXT_API_INTERNAL_BASE=http://backend:4400
 
 COPY --from=build --chown=node:node /app/.output ./.output
 

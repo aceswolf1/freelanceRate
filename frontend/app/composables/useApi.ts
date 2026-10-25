@@ -53,7 +53,7 @@ export class ApiError extends Error {
  *   forms can render them inline.
  */
 /** Fallback used when the Nuxt runtime config cannot be read. */
-export const DEFAULT_API_BASE = 'http://localhost:4400/api'
+export const DEFAULT_API_BASE = '/api'
 
 /**
  * Read the API base URL.
