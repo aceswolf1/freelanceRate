@@ -52,7 +52,7 @@ function isActive(item: (typeof NAV_ITEMS)[number]): boolean {
           :data-testid="`nav-${item.to === '/' ? 'timesheet' : item.to.slice(1)}`"
           @click="emit('navigate')"
         >
-          <i :class="[item.icon, 'text-[20px]']" aria-hidden="true" />
+          <i :class="[iconClass(item.icon), 'text-[20px]']" aria-hidden="true" />
           <span>{{ item.label }}</span>
         </NuxtLink>
       </nav>

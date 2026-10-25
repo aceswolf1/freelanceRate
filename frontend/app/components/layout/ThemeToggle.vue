@@ -15,6 +15,6 @@ const icon = computed(() => (isDark.value ? 'pi-sun' : 'pi-moon'))
     :aria-pressed="isDark"
     @click="toggle()"
   >
-    <i :class="[icon, 'text-base']" aria-hidden="true" />
+    <i :class="[iconClass(icon), 'text-base']" aria-hidden="true" />
   </button>
 </template>

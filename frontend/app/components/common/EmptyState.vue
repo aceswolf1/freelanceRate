@@ -18,7 +18,7 @@ withDefaults(defineProps<{
       class="flex size-11 items-center justify-center rounded-xl bg-surface-container-high text-on-surface-variant"
       aria-hidden="true"
     >
-      <i :class="[icon, 'text-xl']" />
+      <i :class="[iconClass(icon), 'text-xl']" />
     </span>
     <div>
       <p class="text-sm font-semibold text-on-surface">

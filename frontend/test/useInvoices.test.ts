@@ -457,6 +457,78 @@ describe('useInvoices — clipboard', () => {
   it('reports failure when the clipboard is blocked entirely', async () => {
     const writeText = vi.fn(async () => { throw new Error('denied') })
     stubClipboard({ writeText })
+    stubExecCommand(false)
+
+    await expect(copyEmailDraft(makeDraft())).resolves.toBe(false)
+  })
+
+  /**
+   * Plain-http LAN deployments (e.g. http://192.168.18.10:3010) are not a
+   * secure context, so `navigator.clipboard` is undefined there. The legacy
+   * `execCommand('copy')` path still works on a click and can carry HTML.
+   */
+  function removeClipboard(): void {
+    Object.defineProperty(globalThis.navigator, 'clipboard', { value: undefined, configurable: true })
+  }
+
+  /** Stubs execCommand('copy') to fire a `copy` event, like a real browser. */
+  function stubExecCommand(result: boolean) {
+    const captured = new Map<string, string>()
+    let defaultPrevented = false
+    const execCommand = vi.fn((command: string) => {
+      if (command === 'copy' && result) {
+        const event = new Event('copy', { cancelable: true }) as Event & { clipboardData: unknown }
+        Object.defineProperty(event, 'clipboardData', {
+          value: { setData: (type: string, value: string) => captured.set(type, value) },
+        })
+        document.dispatchEvent(event)
+        defaultPrevented = event.defaultPrevented
+      }
+      return result
+    })
+    Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true })
+    return { execCommand, captured, wasDefaultPrevented: () => defaultPrevented }
+  }
+
+  it('copies HTML and plain text via execCommand when navigator.clipboard is missing', async () => {
+    removeClipboard()
+    const { execCommand, captured, wasDefaultPrevented } = stubExecCommand(true)
+
+    const written = await copyEmailDraft(makeDraft())
+
+    expect(written).toBe(true)
+    expect(execCommand).toHaveBeenCalledWith('copy')
+    expect(captured.get('text/plain')).toBe('plain body')
+    expect(captured.get('text/html')).toBe(makeDraft().html)
+    expect(wasDefaultPrevented()).toBe(true)
+  })
+
+  it('falls back to execCommand when the async clipboard rejects', async () => {
+    stubClipboard({ writeText: vi.fn(async () => { throw new Error('denied') }) })
+    const { captured } = stubExecCommand(true)
+
+    await expect(copyEmailDraft(makeDraft())).resolves.toBe(true)
+    expect(captured.get('text/plain')).toBe('plain body')
+  })
+
+  it('cleans up after the legacy copy and restores focus', async () => {
+    removeClipboard()
+    stubExecCommand(true)
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+    button.focus()
+    const before = document.body.children.length
+
+    await copyEmailDraft(makeDraft())
+
+    expect(document.body.children.length).toBe(before)
+    expect(document.activeElement).toBe(button)
+    button.remove()
+  })
+
+  it('reports failure when there is no clipboard and execCommand fails', async () => {
+    removeClipboard()
+    stubExecCommand(false)
 
     await expect(copyEmailDraft(makeDraft())).resolves.toBe(false)
   })

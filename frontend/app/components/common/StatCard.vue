@@ -34,7 +34,7 @@ const valueTone: Record<string, string> = {
       :class="toneClasses[tone]"
       aria-hidden="true"
     >
-      <i :class="[icon, 'text-xl']" />
+      <i :class="[iconClass(icon), 'text-xl']" />
     </span>
     <div class="min-w-0">
       <p class="text-[10px] font-semibold uppercase tracking-wider text-on-surface-variant">

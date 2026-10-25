@@ -242,13 +242,19 @@ export function zipFileName(isoWeek: number): string {
 // ---------- clipboard (pure-ish, exercised against a stubbed clipboard) ----------
 
 /**
- * "Copy formatted" (R12): rich HTML when the browser supports `ClipboardItem`,
- * otherwise plain text. `true` when something was written.
+ * "Copy formatted" (R12). `true` when something was written.
+ *
+ * 1. Async Clipboard API — rich HTML via `ClipboardItem`, else plain text.
+ *    Only exists in secure contexts (https or localhost).
+ * 2. Legacy `execCommand('copy')` — the only option on a plain-http LAN
+ *    deployment (e.g. http://192.168.18.10:3010), where `navigator.clipboard`
+ *    is undefined. It must run inside the click, so when the async API is
+ *    missing it runs before anything is awaited.
  */
 export async function copyEmailDraft(draft: InvoiceEmailDraft): Promise<boolean> {
   const clipboard = globalThis.navigator?.clipboard
   if (!clipboard) {
-    return false
+    return legacyCopy(draft)
   }
 
   if (canWriteRich(clipboard) && draft.html) {
@@ -264,16 +270,60 @@ export async function copyEmailDraft(draft: InvoiceEmailDraft): Promise<boolean>
     }
   }
 
-  if (typeof clipboard.writeText !== 'function') {
+  if (typeof clipboard.writeText === 'function') {
+    try {
+      await clipboard.writeText(draft.text)
+      return true
+    }
+    catch {
+      // Fall through to the legacy path.
+    }
+  }
+
+  return legacyCopy(draft)
+}
+
+/**
+ * `execCommand('copy')` fires a `copy` event; its `clipboardData` accepts both
+ * HTML and plain text, so mail clients still paste the formatted tables.
+ * A selected off-screen textarea gives the command something to copy in
+ * browsers that ignore it without a selection. Focus is restored afterwards.
+ */
+function legacyCopy(draft: InvoiceEmailDraft): boolean {
+  const doc = globalThis.document
+  if (!doc || typeof doc.execCommand !== 'function') {
     return false
   }
 
+  const previouslyFocused = doc.activeElement as HTMLElement | null
+  const onCopy = (event: ClipboardEvent): void => {
+    if (!event.clipboardData) return
+    event.clipboardData.setData('text/plain', draft.text)
+    if (draft.html) event.clipboardData.setData('text/html', draft.html)
+    event.preventDefault()
+  }
+
+  const area = doc.createElement('textarea')
+  area.value = draft.text
+  area.setAttribute('readonly', '')
+  area.setAttribute('aria-hidden', 'true')
+  area.style.position = 'fixed'
+  area.style.top = '-1000px'
+  area.style.opacity = '0'
+
+  doc.addEventListener('copy', onCopy)
+  doc.body.appendChild(area)
   try {
-    await clipboard.writeText(draft.text)
-    return true
+    area.select()
+    return doc.execCommand('copy')
   }
   catch {
     return false
+  }
+  finally {
+    doc.removeEventListener('copy', onCopy)
+    area.remove()
+    previouslyFocused?.focus?.()
   }
 }
 
@@ -403,7 +453,7 @@ export function useInvoices() {
       notifier.success('Invoice copied', 'Paste it into your mail client as rich text.')
     }
     else {
-      notifier.error('Could not copy', 'Your browser blocked clipboard access.')
+      notifier.error('Could not copy', 'Your browser blocked clipboard access. Use "Send as Email Text" instead.')
     }
     return written
   }

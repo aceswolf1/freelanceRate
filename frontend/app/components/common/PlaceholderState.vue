@@ -20,7 +20,7 @@ defineProps<{
         class="flex size-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/10 text-primary"
         aria-hidden="true"
       >
-        <i :class="[icon, 'text-2xl']" />
+        <i :class="[iconClass(icon), 'text-2xl']" />
       </span>
       <div class="max-w-md">
         <h2 class="text-lg font-semibold text-on-surface">
