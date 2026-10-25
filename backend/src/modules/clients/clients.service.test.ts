@@ -15,6 +15,7 @@ function row(overrides: Partial<ClientRow> = {}): ClientRow {
   return {
     id: 1,
     name: 'Acme Corp',
+    contactName: null,
     contactEmail: 'billing@acme.example',
     ccEmail: null,
     billingHour: 130,
@@ -83,6 +84,7 @@ describe('ClientsService', () => {
       expect(result[0]).toEqual({
         id: 1,
         name: 'Acme Corp',
+        contactName: null,
         contactEmail: 'billing@acme.example',
         ccEmail: null,
         billingHour: 130,

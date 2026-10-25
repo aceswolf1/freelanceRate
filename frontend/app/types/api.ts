@@ -154,6 +154,8 @@ export type PaymentPlatformUpdate = Partial<PaymentPlatformInput>
 
 // ---------- clients (R1) ----------
 export interface Client extends ClientSummary {
+  /** person to address on invoices and emails; null when unset */
+  contactName: string | null
   paymentPlatformId: number | null
   /** embedded on list + get */
   paymentPlatform: PaymentPlatform | null
@@ -170,6 +172,7 @@ export interface Client extends ClientSummary {
 
 export interface ClientInput {
   name: string
+  contactName?: string | null
   contactEmail: string
   ccEmail?: string | null
   billingHour: number
@@ -218,6 +221,12 @@ export interface Settings {
   currencySymbol: string
   /** default "INV" → INV-2026-001 */
   invoicePrefix: string
+  /** copied email: rate column in each project table (default false) */
+  emailShowRate: boolean
+  /** copied email: Gross line in the totals (default false) */
+  emailShowGross: boolean
+  /** copied email: payment-platform fee line in the totals (default false) */
+  emailShowFee: boolean
   updatedAt: string
 }
 
@@ -358,6 +367,8 @@ export interface Invoice {
   clientId: number | null
   /** "No client" when clientId is null */
   clientName: string
+  /** snapshot; null when the client had no contact name */
+  contactName: string | null
   contactEmail: string
   ccEmail: string | null
   /** snapshot, null when the client has no platform */
@@ -387,6 +398,7 @@ export interface InvoiceWarning {
 export interface InvoicePreviewRow {
   clientId: number | null
   clientName: string
+  contactName: string | null
   contactEmail: string
   ccEmail: string | null
   platformCompany: string | null

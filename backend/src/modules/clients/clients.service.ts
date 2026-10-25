@@ -4,6 +4,7 @@ import type { PaymentPlatformDTO } from '../payment-platforms/payment-platforms.
 
 export interface ClientInput {
   name: string;
+  contactName?: string | null;
   contactEmail: string;
   ccEmail?: string | null;
   billingHour: number;
@@ -16,6 +17,7 @@ export type ClientUpdate = Partial<ClientInput>;
 export interface ClientDTO {
   id: number;
   name: string;
+  contactName: string | null;
   contactEmail: string;
   ccEmail: string | null;
   billingHour: number;
@@ -46,6 +48,7 @@ function toDTO(row: ClientRow): ClientDTO {
   return {
     id: row.id,
     name: row.name,
+    contactName: row.contactName,
     contactEmail: row.contactEmail,
     ccEmail: row.ccEmail,
     billingHour: row.billingHour,

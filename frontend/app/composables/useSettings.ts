@@ -14,6 +14,9 @@ export const SETTINGS_FALLBACK: Settings = {
   weeklyTargetHours: 40,
   currencySymbol: '$',
   invoicePrefix: 'INV',
+  emailShowRate: false,
+  emailShowGross: false,
+  emailShowFee: false,
   updatedAt: '',
 }
 

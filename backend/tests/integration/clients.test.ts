@@ -53,6 +53,26 @@ describe('clients CRUD', () => {
     expect(listed.body.data[0].paymentPlatform).toBeNull();
   });
 
+  it('stores an optional contact name and clears it with null', async () => {
+    const created = await api()
+      .post('/api/clients')
+      .send({ name: 'Acme', contactName: 'Jane Doe', contactEmail: 'a@acme.example', billingHour: 100 })
+      .expect(201);
+    expect(created.body.data.contactName).toBe('Jane Doe');
+
+    const withoutName = await api()
+      .post('/api/clients')
+      .send({ name: 'Beta', contactEmail: 'b@beta.example', billingHour: 90 })
+      .expect(201);
+    expect(withoutName.body.data.contactName).toBeNull();
+
+    const cleared = await api()
+      .patch(`/api/clients/${created.body.data.id}`)
+      .send({ contactName: null })
+      .expect(200);
+    expect(cleared.body.data.contactName).toBeNull();
+  });
+
   it('updates only the supplied fields', async () => {
     const { clientId } = await seedFixtures();
     const response = await api()

@@ -19,6 +19,7 @@ function client(overrides: Partial<EngineClient> = {}): EngineClient {
   return {
     id: 1,
     name: 'Acme Corp',
+    contactName: null,
     contactEmail: 'billing@acme.example',
     ccEmail: 'finance@acme.example',
     feePercent: 0,

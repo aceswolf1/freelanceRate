@@ -26,6 +26,7 @@ export const invoices = pgTable(
     clientId: integer('client_id').references(() => clients.id, { onDelete: 'set null' }),
 
     clientNameSnapshot: text('client_name_snapshot').notNull(),
+    contactNameSnapshot: text('contact_name_snapshot'),
     contactEmailSnapshot: text('contact_email_snapshot').notNull().default(''),
     ccEmailSnapshot: text('cc_email_snapshot'),
     platformCompanySnapshot: text('platform_company_snapshot'),

@@ -12,6 +12,9 @@ export const updateSettingsSchema = z
       .min(1)
       .max(10)
       .regex(/^[A-Za-z0-9-]+$/, 'May only contain letters, digits and dashes'),
+    emailShowRate: z.boolean(),
+    emailShowGross: z.boolean(),
+    emailShowFee: z.boolean(),
   })
   .strict()
   .partial();

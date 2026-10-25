@@ -75,6 +75,8 @@ export interface InvoiceDto {
   weekId: number;
   clientId: number | null;
   clientName: string;
+  /** Person to address; null when the client has none (or the "No client" bucket). */
+  contactName: string | null;
   contactEmail: string;
   ccEmail: string | null;
   platformCompany: string | null;
@@ -103,6 +105,8 @@ export type InvoicePreviewLineDto = Omit<InvoiceLineDto, 'id'>;
 export interface InvoicePreviewRowDto {
   clientId: number | null;
   clientName: string;
+  /** Person to address; null when the client has none (or the "No client" bucket). */
+  contactName: string | null;
   contactEmail: string;
   ccEmail: string | null;
   platformCompany: string | null;

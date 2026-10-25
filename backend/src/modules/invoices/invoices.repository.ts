@@ -6,6 +6,7 @@
  * joined read, and invoice lines are fetched in one batched query.
  */
 import { asc, eq, inArray, sql } from 'drizzle-orm';
+import type { EmailOptions } from './invoices.email.js';
 import type { Database } from '../../db/client.js';
 import {
   clients,
@@ -32,6 +33,7 @@ export interface WeekInvoiceSource {
     weeklyTargetHours: number;
     currencySymbol: string;
     invoicePrefix: string;
+    emailOptions: EmailOptions;
   };
   records: EngineRecord[];
   clients: EngineClient[];
@@ -150,6 +152,7 @@ export class InvoicesRepository {
         .select({
           id: clients.id,
           name: clients.name,
+          contactName: clients.contactName,
           contactEmail: clients.contactEmail,
           ccEmail: clients.ccEmail,
           platformCompany: paymentPlatforms.company,
@@ -171,6 +174,7 @@ export class InvoicesRepository {
       clients: clientRows.map((row) => ({
         id: row.id,
         name: row.name,
+        contactName: row.contactName,
         contactEmail: row.contactEmail,
         ccEmail: row.ccEmail,
         platformCompany: row.platformCompany,
@@ -274,6 +278,7 @@ export class InvoicesRepository {
         weekId: row.weekId,
         clientId: row.clientId,
         clientName: row.clientNameSnapshot,
+        contactName: row.contactNameSnapshot,
         contactEmail: row.contactEmailSnapshot,
         ccEmail: row.ccEmailSnapshot,
         platformCompany: row.platformCompanySnapshot,
@@ -300,6 +305,11 @@ function toSettings(row: typeof settings.$inferSelect): WeekInvoiceSource['setti
     weeklyTargetHours: row.weeklyTargetHours,
     currencySymbol: row.currencySymbol,
     invoicePrefix: row.invoicePrefix,
+    emailOptions: {
+      showRate: row.emailShowRate,
+      showGross: row.emailShowGross,
+      showFee: row.emailShowFee,
+    },
   };
 }
 

@@ -30,6 +30,7 @@ function invoice(overrides: Partial<InvoiceDto> = {}): InvoiceDto {
     weekId: 1,
     clientId: 1,
     clientName: 'Acme Corp',
+    contactName: null,
     contactEmail: 'billing@acme.example',
     ccEmail: 'finance@acme.example',
     platformCompany: 'Payoneer',
@@ -75,7 +76,7 @@ describe('buildEmailDraft', () => {
   });
 
   it('groups the plain-text body by project with aligned columns', () => {
-    const { text } = buildEmailDraft(input());
+    const { text } = buildEmailDraft(input({ options: { showRate: true, showGross: false, showFee: false } }));
 
     expect(text).toContain('E-Commerce Storefront');
     expect(text).toContain('Mon, Oct 19');
@@ -89,8 +90,8 @@ describe('buildEmailDraft', () => {
     expect(rightEdge(rows[0], 'Total')).toBe(rightEdge(rows[1], '$455.00'));
   });
 
-  it('summarises gross, fee and net in the plain-text body', () => {
-    const { text } = buildEmailDraft(input());
+  it('summarises gross, fee and net in the plain-text body when enabled', () => {
+    const { text } = buildEmailDraft(input({ options: { showRate: false, showGross: true, showFee: true } }));
 
     expect(text).toContain('$2,275.00');
     expect(text).toContain('$22.75');
@@ -188,5 +189,108 @@ describe('buildEmailDraft', () => {
     expect(draft.cc).toBeNull();
     expect(draft.subject).toContain('No client');
     expect(draft.text).toContain('No client');
+  });
+
+  describe('email content options (all off by default)', () => {
+    it('hides the rate column, gross and fee lines by default', () => {
+      const { text, html } = buildEmailDraft(input());
+
+      expect(text).not.toMatch(/\bRate\b/);
+      expect(text).not.toContain('$130.00');
+      expect(text).not.toMatch(/^Gross/m);
+      expect(text).not.toContain('Payoneer fee');
+      expect(text).not.toContain('$22.75');
+      expect(text).toContain('Net due');
+      expect(text).toContain('$2,252.25');
+      expect(html).not.toContain('>Rate<');
+      expect(html).not.toContain('>Gross<');
+      expect(html).not.toContain('Payoneer fee');
+      expect(html).toContain('$2,252.25');
+    });
+
+    it('treats a missing options object as all-off', () => {
+      const withDefaults = buildEmailDraft(input());
+      const explicitOff = buildEmailDraft(
+        input({ options: { showRate: false, showGross: false, showFee: false } }),
+      );
+
+      expect(withDefaults.text).toBe(explicitOff.text);
+      expect(withDefaults.html).toBe(explicitOff.html);
+    });
+
+    it('shows the rate column in every project table when showRate is on', () => {
+      const { text, html } = buildEmailDraft(
+        input({ options: { showRate: true, showGross: false, showFee: false } }),
+      );
+
+      expect(text).toMatch(/\bRate\b/);
+      expect(text).toContain('$130.00');
+      expect(html).toContain('>Rate<');
+      expect(html).toContain('$130.00');
+    });
+
+    it('keeps plain-text columns aligned when the rate column is hidden', () => {
+      const { text } = buildEmailDraft(input());
+      const rows = text.split('\n').filter((row) => row.includes('$455.00') || row.includes('Total'));
+      const rightEdge = (row: string | undefined, needle: string): number =>
+        (row?.indexOf(needle) ?? -1) + needle.length;
+
+      expect(rightEdge(rows[0], 'Total')).toBe(rightEdge(rows[1], '$455.00'));
+    });
+
+    it('shows only the gross line when showGross is on', () => {
+      const { text, html } = buildEmailDraft(
+        input({ options: { showRate: false, showGross: true, showFee: false } }),
+      );
+
+      expect(text).toMatch(/^Gross\s+\$2,275\.00$/m);
+      expect(text).not.toContain('Payoneer fee');
+      expect(html).toContain('>Gross<');
+      expect(html).not.toContain('Payoneer fee');
+    });
+
+    it('shows only the fee line when showFee is on', () => {
+      const { text, html } = buildEmailDraft(
+        input({ options: { showRate: false, showGross: false, showFee: true } }),
+      );
+
+      expect(text).toContain('Payoneer fee (1%)');
+      expect(text).toContain('-$22.75');
+      expect(text).not.toMatch(/^Gross/m);
+      expect(html).toContain('Payoneer fee (1%)');
+    });
+
+    it('applies the options to the shortened mailto body too', () => {
+      const lines = Array.from({ length: 80 }, (_, index) =>
+        line({ id: index + 1, recordId: index + 1, description: `Long task number ${index} with a long description`, hours: 1, lineTotal: 130 }),
+      );
+      const draft = buildEmailDraft(input({ invoice: invoice({ lines }) }));
+
+      expect(draft.truncated).toBe(true);
+      expect(draft.text).not.toMatch(/^Gross/m);
+      expect(draft.text).not.toContain('Payoneer fee');
+      expect(draft.text).toContain('Net due');
+    });
+  });
+
+  describe('contact name', () => {
+    it('greets the contact by name when the client has one', () => {
+      const { text, html } = buildEmailDraft(input({ invoice: invoice({ contactName: 'Jane Doe' }) }));
+
+      expect(text.split('\n')[0]).toBe('Hi Jane Doe,');
+      expect(html).toContain('<p>Hi Jane Doe,</p>');
+    });
+
+    it('falls back to the client team greeting without a contact name', () => {
+      const { text } = buildEmailDraft(input());
+
+      expect(text.split('\n')[0]).toBe('Hi Acme Corp team,');
+    });
+
+    it('escapes the contact name in the HTML body', () => {
+      const { html } = buildEmailDraft(input({ invoice: invoice({ contactName: 'Tom & <Jerry>' }) }));
+
+      expect(html).toContain('Hi Tom &amp; &lt;Jerry&gt;,');
+    });
   });
 });

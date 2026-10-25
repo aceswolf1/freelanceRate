@@ -18,10 +18,28 @@ import type { InvoiceDto, InvoiceEmailDraftDto, InvoiceLineDto } from './invoice
  */
 export const MAILTO_BODY_LIMIT = 2000;
 
+/** What the copied email may reveal to the client (Settings → Email content). */
+export interface EmailOptions {
+  /** Rate column in every project table. */
+  showRate: boolean;
+  /** "Gross" line in the totals. */
+  showGross: boolean;
+  /** Payment-platform fee line in the totals. */
+  showFee: boolean;
+}
+
+/** All off: the client sees hours, line totals and the amount due only. */
+export const DEFAULT_EMAIL_OPTIONS: EmailOptions = Object.freeze({
+  showRate: false,
+  showGross: false,
+  showFee: false,
+});
+
 export interface EmailInput {
   invoice: InvoiceDto;
   senderName: string;
   currencySymbol: string;
+  options?: EmailOptions;
 }
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const;
@@ -109,6 +127,7 @@ function padLeft(value: string, width: number): string {
 }
 
 function greeting(invoice: InvoiceDto): string {
+  if (invoice.contactName) return `Hi ${invoice.contactName},`;
   return invoice.clientId === null ? 'Hello,' : `Hi ${invoice.clientName} team,`;
 }
 
@@ -125,12 +144,29 @@ function feeLabel(invoice: InvoiceDto): string {
   return `${invoice.platformCompany} fee (${parts.join(' + ')})`;
 }
 
-function buildPlainText(invoice: InvoiceDto, senderName: string): string {
+/** The optional Gross / fee lines followed by the amount due, as label–value pairs. */
+function totalRows(invoice: InvoiceDto, options: EmailOptions): Array<[string, string]> {
   const symbol = invoice.currencySymbol;
+  return [
+    ...(options.showGross ? [['Gross', money(invoice.gross, symbol)] as [string, string]] : []),
+    ...(options.showFee
+      ? [[feeLabel(invoice), `-${money(invoice.feeAmount, symbol)}`] as [string, string]]
+      : []),
+    ['Net due', money(invoice.net, symbol)],
+  ];
+}
+
+function plainTotalLine([label, value]: [string, string]): string {
+  return padRight(label, TOTAL_LABEL_WIDTH) + padLeft(value, 14);
+}
+
+function buildPlainText(invoice: InvoiceDto, senderName: string, options: EmailOptions): string {
+  const symbol = invoice.currencySymbol;
+  const rateCell = (value: string): string => (options.showRate ? padLeft(value, COL.rate) : '');
   const header =
     padRight('Date', COL.date) +
     padLeft('Hours', COL.hours) +
-    padLeft('Rate', COL.rate) +
+    rateCell('Rate') +
     padLeft('Total', COL.total);
 
   const sections = groupByProject(invoice.lines).map((block) => {
@@ -138,24 +174,20 @@ function buildPlainText(invoice: InvoiceDto, senderName: string): string {
       (line) =>
         padRight(formatLineDate(line.date), COL.date) +
         padLeft(formatHours(line.hours), COL.hours) +
-        padLeft(money(line.rate, symbol), COL.rate) +
+        rateCell(money(line.rate, symbol)) +
         padLeft(money(line.lineTotal, symbol), COL.total),
     );
     const subtotal =
       padRight(`Subtotal (${formatHours(block.hours)} h)`, COL.date + COL.hours) +
-      padLeft('', COL.rate) +
+      rateCell('') +
       padLeft(money(block.gross, symbol), COL.total);
 
     return [`${block.projectName}`, '', header, ...rows, subtotal].join('\n');
   });
 
   const totals = [
-    padRight(`Hours (${formatHours(invoice.totalHours)} h)`, TOTAL_LABEL_WIDTH) +
-      padLeft(money(invoice.gross, symbol), 14),
-    padRight('Gross', TOTAL_LABEL_WIDTH) + padLeft(money(invoice.gross, symbol), 14),
-    padRight(feeLabel(invoice), TOTAL_LABEL_WIDTH) +
-      padLeft(`-${money(invoice.feeAmount, symbol)}`, 14),
-    padRight('Net due', TOTAL_LABEL_WIDTH) + padLeft(money(invoice.net, symbol), 14),
+    padRight('Hours', TOTAL_LABEL_WIDTH) + padLeft(formatHours(invoice.totalHours), 14),
+    ...totalRows(invoice, options).map(plainTotalLine),
   ];
 
   return [
@@ -176,7 +208,7 @@ function buildPlainText(invoice: InvoiceDto, senderName: string): string {
 }
 
 /** Totals-only body used when the mailto body would exceed the length limit. */
-function buildShortText(invoice: InvoiceDto, senderName: string): string {
+function buildShortText(invoice: InvoiceDto, senderName: string, options: EmailOptions): string {
   const symbol = invoice.currencySymbol;
   const lines = groupByProject(invoice.lines).map(
     (block) =>
@@ -191,10 +223,7 @@ function buildShortText(invoice: InvoiceDto, senderName: string): string {
     '',
     ...lines,
     '',
-    padRight('Gross', TOTAL_LABEL_WIDTH) + padLeft(money(invoice.gross, symbol), 14),
-    padRight(feeLabel(invoice), TOTAL_LABEL_WIDTH) +
-      padLeft(`-${money(invoice.feeAmount, symbol)}`, 14),
-    padRight('Net due', TOTAL_LABEL_WIDTH) + padLeft(money(invoice.net, symbol), 14),
+    ...totalRows(invoice, options).map(plainTotalLine),
     '',
     'Full line-by-line breakdown in the attached PDF — or use "Copy formatted" to paste a table.',
     '',
@@ -212,11 +241,11 @@ function escapeHtml(value: string): string {
     .replace(/'/g, '&#39;');
 }
 
-function projectTable(block: ProjectBlock, symbol: string): string {
+function projectTable(block: ProjectBlock, symbol: string, options: EmailOptions): string {
   const header =
     `<tr><th style="${TH_STYLE}">Date</th>` +
     `<th style="${TH_STYLE}${RIGHT}">Hours</th>` +
-    `<th style="${TH_STYLE}${RIGHT}">Rate</th>` +
+    (options.showRate ? `<th style="${TH_STYLE}${RIGHT}">Rate</th>` : '') +
     `<th style="${TH_STYLE}${RIGHT}">Total</th></tr>`;
 
   const rows = block.lines
@@ -226,14 +255,16 @@ function projectTable(block: ProjectBlock, symbol: string): string {
         `<td style="${TD_STYLE}">${escapeHtml(formatLineDate(line.date))}<br>` +
         `<span style="color:#5b5b66">${escapeHtml(line.description)}</span></td>` +
         `<td style="${TD_STYLE}${RIGHT}">${escapeHtml(formatHours(line.hours))}</td>` +
-        `<td style="${TD_STYLE}${RIGHT}">${escapeHtml(money(line.rate, symbol))}</td>` +
+        (options.showRate
+          ? `<td style="${TD_STYLE}${RIGHT}">${escapeHtml(money(line.rate, symbol))}</td>`
+          : '') +
         `<td style="${TD_STYLE}${RIGHT}">${escapeHtml(money(line.lineTotal, symbol))}</td>` +
         '</tr>',
     )
     .join('');
 
   const subtotal =
-    `<tr><td colspan="3" style="${TD_STYLE}${RIGHT};font-weight:700;border-bottom:none">` +
+    `<tr><td colspan="${options.showRate ? 3 : 2}" style="${TD_STYLE}${RIGHT};font-weight:700;border-bottom:none">` +
     `Subtotal (${escapeHtml(formatHours(block.hours))} h)</td>` +
     `<td style="${TD_STYLE}${RIGHT};font-weight:700;border-bottom:none">` +
     `${escapeHtml(money(block.gross, symbol))}</td></tr>`;
@@ -244,8 +275,7 @@ function projectTable(block: ProjectBlock, symbol: string): string {
   );
 }
 
-function totalsTable(invoice: InvoiceDto): string {
-  const symbol = invoice.currencySymbol;
+function totalsTable(invoice: InvoiceDto, options: EmailOptions): string {
   const row = (label: string, value: string, strong = false) => {
     const weight = strong ? 'font-weight:700;' : '';
     return (
@@ -258,19 +288,19 @@ function totalsTable(invoice: InvoiceDto): string {
     `<table cellpadding="0" cellspacing="0" border="0" style="${TABLE_BASE_STYLE}max-width:420px">` +
     '<tbody>' +
     row('Hours', formatHours(invoice.totalHours)) +
-    row('Gross', money(invoice.gross, symbol)) +
-    row(feeLabel(invoice), `-${money(invoice.feeAmount, symbol)}`) +
-    row('Net due', money(invoice.net, symbol), true) +
+    totalRows(invoice, options)
+      .map(([label, value]) => row(label, value, label === 'Net due'))
+      .join('') +
     '</tbody></table>'
   );
 }
 
-function buildHtml(invoice: InvoiceDto, senderName: string): string {
+function buildHtml(invoice: InvoiceDto, senderName: string, options: EmailOptions): string {
   const blocks = groupByProject(invoice.lines)
     .map(
       (block) =>
         `<p style="margin:16px 0 4px;font-weight:700;font-size:13px">${escapeHtml(block.projectName)}</p>` +
-        projectTable(block, invoice.currencySymbol),
+        projectTable(block, invoice.currencySymbol, options),
     )
     .join('');
 
@@ -282,7 +312,7 @@ function buildHtml(invoice: InvoiceDto, senderName: string): string {
     blocks +
     '<p style="margin:20px 0 6px;font-weight:700;font-size:11px;letter-spacing:.04em;' +
     `text-transform:uppercase;color:#5b5b66">Totals</p>` +
-    totalsTable(invoice) +
+    totalsTable(invoice, options) +
     '<p style="margin:16px 0 0;color:#5b5b66;font-size:12px">Full itemised breakdown in the attached PDF.</p>' +
     `<p style="margin:16px 0 0">Thanks,<br>${escapeHtml(senderName)}</p>` +
     '</div>'
@@ -297,13 +327,14 @@ function buildMailto(to: string, cc: string | null, subject: string, body: strin
 /** Builds the complete R12 email draft for one invoice. */
 export function buildEmailDraft(input: EmailInput): InvoiceEmailDraftDto {
   const { invoice, senderName } = input;
+  const options = input.options ?? DEFAULT_EMAIL_OPTIONS;
   const subject = `Invoice ${invoice.number} — ${invoice.clientName} — ${formatDisplayDate(
     invoice.periodStart,
   )} to ${formatDisplayDate(invoice.periodEnd)}`;
 
-  const fullText = buildPlainText(invoice, senderName);
+  const fullText = buildPlainText(invoice, senderName, options);
   const truncated = encodeURIComponent(fullText).length > MAILTO_BODY_LIMIT;
-  const text = truncated ? buildShortText(invoice, senderName) : fullText;
+  const text = truncated ? buildShortText(invoice, senderName, options) : fullText;
 
   return {
     to: invoice.contactEmail,
@@ -311,7 +342,7 @@ export function buildEmailDraft(input: EmailInput): InvoiceEmailDraftDto {
     subject,
     text,
     // "Copy formatted" has no length limit, so it always carries the full table.
-    html: buildHtml(invoice, senderName),
+    html: buildHtml(invoice, senderName, options),
     mailto: buildMailto(invoice.contactEmail, invoice.ccEmail, subject, text),
     truncated,
   };

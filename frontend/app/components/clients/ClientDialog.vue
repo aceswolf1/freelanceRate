@@ -27,6 +27,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 interface FormState {
   name: string
+  contactName: string
   contactEmail: string
   ccEmail: string
   billingHour: number | null
@@ -36,6 +37,7 @@ interface FormState {
 
 const blank = (): FormState => ({
   name: '',
+  contactName: '',
   contactEmail: '',
   ccEmail: '',
   billingHour: null,
@@ -60,6 +62,7 @@ watch(
     Object.assign(form, client
       ? {
           name: client.name,
+          contactName: client.contactName ?? '',
           contactEmail: client.contactEmail,
           ccEmail: client.ccEmail ?? '',
           billingHour: client.billingHour,
@@ -83,6 +86,10 @@ function validate(): Record<string, string> {
   }
   else if (form.name.trim().length > 120) {
     found.name = 'Keep the name under 120 characters.'
+  }
+
+  if (form.contactName.trim().length > 120) {
+    found.contactName = 'Keep the contact name under 120 characters.'
   }
 
   if (!form.contactEmail.trim()) {
@@ -116,6 +123,7 @@ function validate(): Record<string, string> {
 function toInput(): ClientInput {
   return {
     name: form.name.trim(),
+    contactName: form.contactName.trim() ? form.contactName.trim() : null,
     contactEmail: form.contactEmail.trim(),
     ccEmail: form.ccEmail.trim() ? form.ccEmail.trim() : null,
     billingHour: Number(form.billingHour),
@@ -178,6 +186,26 @@ async function save(): Promise<void> {
             :invalid="invalid"
             autocomplete="organization"
             placeholder="Acme Corp"
+            fluid
+          />
+        </template>
+      </BfFormField>
+
+      <BfFormField
+        label="Contact Name"
+        field-id="client-contact-name"
+        hint="Optional. Greets this person in the invoice email and appears on the PDF."
+        :error="errors.contactName"
+      >
+        <template #default="{ fieldId, describedBy, invalid }">
+          <InputText
+            :id="fieldId"
+            v-model="form.contactName"
+            :aria-describedby="describedBy"
+            :invalid="invalid"
+            autocomplete="name"
+            placeholder="Jane Doe"
+            maxlength="120"
             fluid
           />
         </template>

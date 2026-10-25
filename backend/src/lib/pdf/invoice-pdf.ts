@@ -213,6 +213,7 @@ export function buildInvoiceDocDefinition(input: InvoicePdfInput): unknown {
           stack: [
             { text: 'BILL TO', style: 'label' },
             { text: invoice.clientName, bold: true, fontSize: 10 },
+            ...(invoice.contactName ? [{ text: `Attn: ${invoice.contactName}` }] : []),
             { text: invoice.contactEmail, style: 'muted' },
             ...(invoice.ccEmail ? [{ text: `cc: ${invoice.ccEmail}`, style: 'muted' }] : []),
           ],

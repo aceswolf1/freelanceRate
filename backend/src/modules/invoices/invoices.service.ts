@@ -36,6 +36,7 @@ function toPreviewRow(draft: EngineDraft): InvoicePreviewRowDto {
   return {
     clientId: draft.clientId,
     clientName: draft.clientName,
+    contactName: draft.contactName,
     contactEmail: draft.contactEmail,
     ccEmail: draft.ccEmail,
     platformCompany: draft.platformCompany,
@@ -132,6 +133,7 @@ export class InvoicesService {
           weekId,
           clientId: draft.clientId,
           clientNameSnapshot: draft.clientName,
+          contactNameSnapshot: draft.contactName,
           contactEmailSnapshot: draft.contactEmail,
           ccEmailSnapshot: draft.ccEmail,
           platformCompanySnapshot: draft.platformCompany,
@@ -183,6 +185,7 @@ export class InvoicesService {
       invoice,
       senderName: settings.displayName,
       currencySymbol: settings.currencySymbol,
+      options: settings.emailOptions,
     });
   }
 

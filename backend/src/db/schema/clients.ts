@@ -8,6 +8,7 @@ export const clients = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     name: text('name').notNull(),
+    contactName: text('contact_name'),
     contactEmail: text('contact_email').notNull(),
     ccEmail: text('cc_email'),
     billingHour: money('billing_hour').notNull(),

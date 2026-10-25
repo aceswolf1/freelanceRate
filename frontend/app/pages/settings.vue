@@ -16,6 +16,9 @@ interface SettingsForm {
   weeklyTargetHours: number | null
   currencySymbol: string
   invoicePrefix: string
+  emailShowRate: boolean
+  emailShowGross: boolean
+  emailShowFee: boolean
 }
 
 const form = reactive<SettingsForm>({
@@ -23,6 +26,9 @@ const form = reactive<SettingsForm>({
   weeklyTargetHours: 40,
   currencySymbol: '$',
   invoicePrefix: 'INV',
+  emailShowRate: false,
+  emailShowGross: false,
+  emailShowFee: false,
 })
 
 const errors = ref<Record<string, string>>({})
@@ -109,6 +115,9 @@ function currentFormValues(): Record<string, unknown> {
     weeklyTargetHours: form.weeklyTargetHours,
     currencySymbol: form.currencySymbol,
     invoicePrefix: form.invoicePrefix,
+    emailShowRate: form.emailShowRate,
+    emailShowGross: form.emailShowGross,
+    emailShowFee: form.emailShowFee,
   }
 }
 
@@ -118,6 +127,9 @@ function hydrate(next: Settings): void {
     weeklyTargetHours: next.weeklyTargetHours,
     currencySymbol: next.currencySymbol,
     invoicePrefix: next.invoicePrefix,
+    emailShowRate: next.emailShowRate,
+    emailShowGross: next.emailShowGross,
+    emailShowFee: next.emailShowFee,
   })
   hydratedSnapshot = JSON.stringify(currentFormValues())
   errors.value = {}
@@ -179,6 +191,9 @@ async function saveSettings(): Promise<void> {
       weeklyTargetHours: Number(form.weeklyTargetHours),
       currencySymbol: form.currencySymbol.trim(),
       invoicePrefix: form.invoicePrefix.trim().toUpperCase(),
+      emailShowRate: form.emailShowRate,
+      emailShowGross: form.emailShowGross,
+      emailShowFee: form.emailShowFee,
     }
     hydrate(await save(payload))
     notifySaved()
@@ -366,6 +381,12 @@ const invoicePreview = computed(() => `${form.invoicePrefix.trim().toUpperCase()
             </BfFormField>
           </div>
         </div>
+
+        <EmailContentPanel
+          v-model:show-rate="form.emailShowRate"
+          v-model:show-gross="form.emailShowGross"
+          v-model:show-fee="form.emailShowFee"
+        />
 
         <div class="bf-panel flex items-center justify-between gap-4 p-5">
           <div class="flex items-center gap-2.5">

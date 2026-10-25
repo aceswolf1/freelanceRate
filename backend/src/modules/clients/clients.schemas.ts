@@ -10,6 +10,7 @@ import {
 export const createClientSchema = z
   .object({
     name: requiredText(120),
+    contactName: nullableText(120),
     contactEmail: emailSchema,
     ccEmail: emailSchema.nullable().optional(),
     billingHour: moneyValueSchema({ min: 0.01, max: 10_000 }),

@@ -20,6 +20,7 @@ export type PaymentPlatformRef = {
 export interface ClientRow {
   id: number;
   name: string;
+  contactName: string | null;
   contactEmail: string;
   ccEmail: string | null;
   billingHour: number;

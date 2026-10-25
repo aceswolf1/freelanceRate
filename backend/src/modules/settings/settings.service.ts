@@ -5,6 +5,9 @@ export interface SettingsUpdate {
   weeklyTargetHours?: number;
   currencySymbol?: string;
   invoicePrefix?: string;
+  emailShowRate?: boolean;
+  emailShowGross?: boolean;
+  emailShowFee?: boolean;
 }
 
 export interface SettingsDTO {
@@ -13,6 +16,10 @@ export interface SettingsDTO {
   weeklyTargetHours: number;
   currencySymbol: string;
   invoicePrefix: string;
+  /** Copied-email content toggles — all false by default. */
+  emailShowRate: boolean;
+  emailShowGross: boolean;
+  emailShowFee: boolean;
   updatedAt: string;
 }
 
@@ -23,6 +30,9 @@ function toDTO(row: SettingsRow): SettingsDTO {
     weeklyTargetHours: row.weeklyTargetHours,
     currencySymbol: row.currencySymbol,
     invoicePrefix: row.invoicePrefix,
+    emailShowRate: row.emailShowRate,
+    emailShowGross: row.emailShowGross,
+    emailShowFee: row.emailShowFee,
     updatedAt: row.updatedAt.toISOString(),
   };
 }

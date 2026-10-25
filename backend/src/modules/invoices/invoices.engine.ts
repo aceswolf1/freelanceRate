@@ -22,6 +22,7 @@ export type WarningCode = 'WEEK_OPEN' | 'BELOW_TARGET' | 'NO_RECORDS';
 export interface EngineClient {
   id: number;
   name: string;
+  contactName: string | null;
   contactEmail: string;
   ccEmail: string | null;
   feePercent: number;
@@ -75,6 +76,7 @@ export interface EngineDraftSubtotal {
 export interface EngineDraft {
   clientId: number | null;
   clientName: string;
+  contactName: string | null;
   contactEmail: string;
   ccEmail: string | null;
   platformCompany: string | null;
@@ -228,6 +230,7 @@ function buildDraft(
   return {
     clientId: bucket.clientId,
     clientName: source?.name ?? NO_CLIENT_NAME,
+    contactName: source?.contactName ?? null,
     contactEmail: source?.contactEmail ?? '',
     ccEmail: source?.ccEmail ?? null,
     platformCompany: source?.platformCompany ?? null,

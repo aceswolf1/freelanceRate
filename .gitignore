@@ -52,3 +52,6 @@ docker-data/
 # --- Claude Code local config (machine-specific; keep the design references) ---
 .claude/settings.json
 .claude/settings.local.json
+
+# Claude Code scheduler state
+.claude/scheduled_tasks.lock

@@ -9,6 +9,9 @@ function row(overrides: Partial<SettingsRow> = {}): SettingsRow {
     weeklyTargetHours: 40,
     currencySymbol: '$',
     invoicePrefix: 'INV',
+    emailShowRate: false,
+    emailShowGross: false,
+    emailShowFee: false,
     updatedAt: new Date('2026-10-22T18:04:11.001Z'),
     ...overrides,
   };
@@ -42,6 +45,9 @@ describe('SettingsService', () => {
         weeklyTargetHours: 40,
         currencySymbol: '$',
         invoicePrefix: 'INV',
+        emailShowRate: false,
+        emailShowGross: false,
+        emailShowFee: false,
         updatedAt: '2026-10-22T18:04:11.001Z',
       });
       expect(repo.ensure).toHaveBeenCalled();

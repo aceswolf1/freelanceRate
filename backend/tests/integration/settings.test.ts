@@ -12,8 +12,27 @@ describe('settings', () => {
       weeklyTargetHours: 40,
       currencySymbol: '$',
       invoicePrefix: 'INV',
+      emailShowRate: false,
+      emailShowGross: false,
+      emailShowFee: false,
     });
     expect(response.body.data.updatedAt).toEqual(expect.any(String));
+  });
+
+  it('toggles the copied-email content options', async () => {
+    const response = await api()
+      .put('/api/settings')
+      .send({ emailShowRate: true, emailShowFee: true })
+      .expect(200);
+    expect(response.body.data).toMatchObject({
+      emailShowRate: true,
+      emailShowGross: false,
+      emailShowFee: true,
+    });
+  });
+
+  it('rejects a non-boolean email option', async () => {
+    await api().put('/api/settings').send({ emailShowRate: 'yes' }).expect(400);
   });
 
   it('keps returning the same single row on repeat reads', async () => {

@@ -15,6 +15,9 @@ const realSettings: Settings = {
   weeklyTargetHours: 40,
   currencySymbol: '$',
   invoicePrefix: 'INV',
+  emailShowRate: false,
+  emailShowGross: false,
+  emailShowFee: false,
   updatedAt: '2026-10-22T18:04:11.001Z',
 }
 
@@ -181,6 +184,85 @@ describe('GAP-006 — the fee column header is interpolated', () => {
     expect(header!.text()).toContain('Fee on $1000.00')
     expect(header!.text()).not.toContain('{{')
     expect(header!.text()).not.toContain('}}')
+
+    wrapper.unmount()
+  })
+})
+
+describe('Email content options', () => {
+  beforeEach(() => {
+    clearNuxtState()
+    document.body.innerHTML = ''
+  })
+
+  async function mockApi(stored: Settings, putBodies: unknown[]): Promise<void> {
+    const { $fetch } = await import('#build/fetch')
+    vi.mocked($fetch).mockImplementation((url: string, options?: { body?: unknown }) => {
+      if (String(url).endsWith('/settings') && options?.body) {
+        putBodies.push(options.body)
+        return Promise.resolve({ success: true, data: { ...stored, ...(options.body as object) } }) as never
+      }
+      if (String(url).endsWith('/settings')) {
+        return Promise.resolve({ success: true, data: stored }) as never
+      }
+      return Promise.resolve({ success: true, data: [] }) as never
+    })
+  }
+
+  function checked(wrapper: { find: (s: string) => { element: unknown } }, id: string): boolean {
+    return (wrapper.find(`#${id}`).element as HTMLInputElement).checked
+  }
+
+  async function settle(): Promise<void> {
+    for (let i = 0; i < 4; i += 1) await nextTick()
+  }
+
+  it('renders the three switches, all off by default', async () => {
+    await mockApi(realSettings, [])
+    const wrapper = await mountSuspended(SettingsPage)
+    await settle()
+
+    expect(wrapper.find('[data-testid="email-content-panel"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('Show rate')
+    expect(wrapper.text()).toContain('Show gross')
+    expect(wrapper.text()).toContain('Show fee')
+    expect(checked(wrapper, 'settings-email-rate')).toBe(false)
+    expect(checked(wrapper, 'settings-email-gross')).toBe(false)
+    expect(checked(wrapper, 'settings-email-fee')).toBe(false)
+
+    wrapper.unmount()
+  })
+
+  it('reflects stored values', async () => {
+    await mockApi({ ...realSettings, emailShowGross: true }, [])
+    const wrapper = await mountSuspended(SettingsPage)
+    await settle()
+
+    expect(checked(wrapper, 'settings-email-rate')).toBe(false)
+    expect(checked(wrapper, 'settings-email-gross')).toBe(true)
+    expect(checked(wrapper, 'settings-email-fee')).toBe(false)
+
+    wrapper.unmount()
+  })
+
+  it('saves a toggled option with Save All Changes', async () => {
+    const putBodies: unknown[] = []
+    await mockApi(realSettings, putBodies)
+    const wrapper = await mountSuspended(SettingsPage)
+    await settle()
+
+    await wrapper.find('#settings-email-rate').setValue(true)
+    await settle()
+    ;(wrapper.find('[data-testid="save-settings"]').element as HTMLButtonElement).click()
+    await settle()
+
+    expect(putBodies.length).toBe(1)
+    expect(putBodies[0]).toMatchObject({
+      emailShowRate: true,
+      emailShowGross: false,
+      emailShowFee: false,
+      displayName: 'Alex Morgan',
+    })
 
     wrapper.unmount()
   })

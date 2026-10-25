@@ -83,8 +83,13 @@ function trimNumber(value: number): string {
       </template>
     </Column>
 
-    <Column field="contactEmail" header="Primary Contact Email">
+    <Column field="contactEmail" header="Primary Contact">
       <template #body="{ data }">
+        <span
+          v-if="data.contactName"
+          class="mb-0.5 block text-sm text-on-surface"
+          data-testid="client-contact-name"
+        >{{ data.contactName }}</span>
         <a
           :href="`mailto:${data.contactEmail}`"
           class="inline-flex items-center gap-1.5 font-mono text-xs text-on-surface hover:text-primary"

@@ -21,6 +21,7 @@ function invoice(overrides: Partial<InvoiceDto> = {}): InvoiceDto {
     weekId: 1,
     clientId: 1,
     clientName: 'Acme Corp',
+    contactName: null,
     contactEmail: 'billing@acme.example',
     ccEmail: 'finance@acme.example',
     platformCompany: 'Payoneer',
@@ -111,6 +112,24 @@ describe('buildInvoiceDocDefinition', () => {
     expect(text).toContain('19-10-2026 – 25-10-2026');
     expect(text).toContain('PAYMENT PLATFORM');
     expect(text).toContain('Payoneer');
+  });
+
+  it('prints the contact name under the bill-to client when set', () => {
+    const strings = collectStrings(
+      buildInvoiceDocDefinition({ invoice: invoice({ contactName: 'Jane Doe' }), senderName: 'Alex Morgan' }),
+    );
+
+    expect(strings).toContain('Attn: Jane Doe');
+    expect(strings.indexOf('Attn: Jane Doe')).toBeGreaterThan(strings.indexOf('Acme Corp'));
+    expect(strings.indexOf('Attn: Jane Doe')).toBeLessThan(strings.indexOf('billing@acme.example'));
+  });
+
+  it('omits the attention line without a contact name', () => {
+    const text = collectStrings(
+      buildInvoiceDocDefinition({ invoice: invoice(), senderName: 'Alex Morgan' }),
+    ).join(' | ');
+
+    expect(text).not.toContain('Attn:');
   });
 
   it('renders one table per project plus project subtotals (R10)', () => {

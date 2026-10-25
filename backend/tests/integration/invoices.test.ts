@@ -317,5 +317,53 @@ describe('invoice endpoints', () => {
       expect(response.body.data.cc).toBeNull();
       expect(response.body.data.mailto).not.toContain('cc=');
     });
+
+    it('hides rate, gross and fee by default and shows them once enabled in settings', async () => {
+      const seed = await seedWeek({ status: 'closed' });
+      const created = await api().post(`/api/weeks/${seed.weekId}/invoices`).send().expect(201);
+      const acme = created.body.data[0];
+
+      const hidden = (await api().get(`/api/invoices/${acme.id}/email`).expect(200)).body.data;
+      expect(hidden.text).not.toMatch(/\bRate\b/);
+      expect(hidden.text).not.toMatch(/^Gross/m);
+      expect(hidden.text).not.toContain('Payoneer fee');
+      expect(hidden.html).not.toContain('>Rate<');
+
+      await api()
+        .put('/api/settings')
+        .send({ emailShowRate: true, emailShowGross: true, emailShowFee: true })
+        .expect(200);
+
+      const shown = (await api().get(`/api/invoices/${acme.id}/email`).expect(200)).body.data;
+      expect(shown.text).toMatch(/\bRate\b/);
+      expect(shown.text).toMatch(/^Gross\s+\$2,275\.00$/m);
+      expect(shown.text).toContain('Payoneer fee');
+      expect(shown.html).toContain('>Rate<');
+    });
+  });
+
+  describe('contact name', () => {
+    it('snapshots the client contact name and uses it in the email and invoice', async () => {
+      const seed = await seedWeek({ status: 'closed' });
+      await api()
+        .patch(`/api/clients/${seed.acmeClientId}`)
+        .send({ contactName: 'Jane Doe' })
+        .expect(200);
+
+      const created = await api().post(`/api/weeks/${seed.weekId}/invoices`).send().expect(201);
+      const acme = created.body.data.find((row: { clientId: number | null }) => row.clientId === seed.acmeClientId);
+      expect(acme.contactName).toBe('Jane Doe');
+
+      // Renaming the contact later never rewrites an issued invoice.
+      await api()
+        .patch(`/api/clients/${seed.acmeClientId}`)
+        .send({ contactName: 'John Smith' })
+        .expect(200);
+
+      const invoice = (await api().get(`/api/invoices/${acme.id}`).expect(200)).body.data;
+      expect(invoice.contactName).toBe('Jane Doe');
+      const draft = (await api().get(`/api/invoices/${acme.id}/email`).expect(200)).body.data;
+      expect(draft.text.split('\n')[0]).toBe('Hi Jane Doe,');
+    });
   });
 });
