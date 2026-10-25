@@ -1,5 +1,5 @@
 // @vitest-environment nuxt
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { todayLocalIso } from '~/utils/format'
 import { shiftDate } from '~/composables/useWeekNavigation'
@@ -12,6 +12,17 @@ import { shiftDate } from '~/composables/useWeekNavigation'
  * highlighted the wrong day column.
  */
 describe('todayLocalIso', () => {
+  // Pin a timezone behind UTC so the evening case is real on every machine —
+  // CI runners use UTC, where the local and UTC dates never differ.
+  const originalTz = process.env.TZ
+  beforeAll(() => {
+    process.env.TZ = 'America/Chicago'
+  })
+  afterAll(() => {
+    if (originalTz === undefined) delete process.env.TZ
+    else process.env.TZ = originalTz
+  })
+
   afterEach(() => {
     vi.useRealTimers()
   })
