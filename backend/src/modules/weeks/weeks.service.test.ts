@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConflictError, NotFoundError, WeekClosedError } from '../../lib/http.js';
 import { todayIso, weekStart } from '../../lib/dates.js';
 import type { RecordContextRow } from '../records/record-context.js';
@@ -88,6 +88,17 @@ describe('WeeksService', () => {
   });
 
   describe('current', () => {
+    // "Today" must fall inside the fixture week (2026-10-19 … 25) or these
+    // assertions depend on the real calendar. Midday UTC is the same date in
+    // every timezone from UTC-11 to UTC+11. Only Date is faked.
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date('2026-10-21T12:00:00.000Z'));
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('creates the week containing today when it does not exist', async () => {
       const empty = createRepo([]);
       const svc = new WeeksService(empty, settingsStub());
