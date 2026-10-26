@@ -75,6 +75,13 @@ export default defineNuxtConfig({
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'BillFlow — freelance time tracking and invoicing' },
+        { name: 'theme-color', content: '#7c3aed' },
+      ],
+      // Receipt-on-violet mark (public/). SVG for modern browsers, PNG/ICO fallbacks.
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
       ],
       // Runs before first paint so the persisted theme never flashes (R14).
       script: [
