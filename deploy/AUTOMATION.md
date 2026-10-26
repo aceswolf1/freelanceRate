@@ -9,7 +9,7 @@ git tag v1.2.0 && git push origin v1.2.0
         │
         ▼
 GitHub Actions (.github/workflows/publish.yml)
-   test (backend + Postgres, frontend) → build multi-arch (amd64+arm64) → GHCR
+   test (backend + Postgres, frontend) → build amd64 + arm64 natively → merge → GHCR
    tags: 1.2.0, 1.2, latest
         │
         ▼  (Watchtower polls GHCR every 5 min)
@@ -158,6 +158,7 @@ the schema.
 |---|---|---|
 | `write_package` denied on first Actions run | Pre-existing package not linked | Manage Actions access → Add `freelanceRate` → Write; re-run |
 | `exec format error` on the NAS | Single-arch image | The workflow builds amd64+arm64; don't push manual single-arch images |
+| Build step fails with `exit code: 132` (illegal instruction) | Emulated (QEMU) arm64 build | The workflow builds each platform on a native runner (`ubuntu-24.04-arm` for arm64); don't reintroduce `setup-qemu-action` |
 | Watchtower `Scanned=0` | App deployed without the `labels:` blocks | Re-paste the current `docker-compose.registry.yml` (keep both `labels:`) |
 | Image pull denied on the NAS | Packages still private | Make them public, or use the private-images steps |
 | Postgres `permission denied` on `pgdata` | Dataset ACL blocks the container's chown | Use a dataset with the **Apps** preset, or give the dataset to uid/gid `70` (postgres in alpine) |
