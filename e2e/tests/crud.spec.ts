@@ -10,7 +10,7 @@
  * validation paragraphs were never rendered. Both are asserted again below.
  */
 import { expect, test } from '@playwright/test'
-import { apiCall, expectEnvelope } from '../helpers/api'
+import { apiCall, expectEnvelope, type ApiEnvelope } from '../helpers/api'
 import { seedDatabase } from '../helpers/servers'
 import { expectToast, fieldInput, fillField, fillNumber, gotoApp, numberInput, selectOption, visibleOptionTexts } from '../helpers/ui'
 
@@ -113,7 +113,7 @@ test.describe('CRUD — clients, projects, platforms and settings', () => {
   })
 
   test('R2 — the API rejects a standalone project without a rate', async ({ request }) => {
-    const result = await apiCall(request, 'post', '/projects', {
+    const result = await apiCall<ApiEnvelope<unknown>>(request, 'post', '/projects', {
       name: 'QA Standalone Without Rate',
       clientId: null,
       description: null,
@@ -122,7 +122,7 @@ test.describe('CRUD — clients, projects, platforms and settings', () => {
     })
     expect(result.status).toBe(400)
     expect(result.json.success).toBe(false)
-    expect(result.json.error.code).toBe('VALIDATION_ERROR')
+    expect(result.json.error!.code).toBe('VALIDATION_ERROR')
   })
 
   test('R2 — a project linked to a client inherits the client rate', async ({ page }) => {

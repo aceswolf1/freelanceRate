@@ -51,7 +51,7 @@ jobs:
         run: |
           npm ci
           npm run typecheck
-          npm test
+          npm run test:coverage
 
   # Each platform builds NATIVELY on its own runner (no QEMU emulation, which
   # crashed `npm ci` with SIGILL / exit 132 and stalled the arm64 builds), and

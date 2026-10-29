@@ -4,12 +4,14 @@ import { FRONTEND_URL } from './helpers/paths'
 /**
  * Playwright configuration for the BillFlow E2E suite.
  *
- * The suite drives a **real** stack: the team's API on :4400 (through the CORS
- * proxy on :4401, see `helpers/paths.ts`) and the production Nuxt build served on
- * :3300. Nothing is mocked.
+ * The suite drives a **real, isolated** stack of its own: the E2E API on :4410
+ * (bound to the `freelancer_invoices_e2e` database) and the production Nuxt
+ * build served on :3300. The browser talks to the **same origin** — the
+ * frontend's `/api` proxy forwards to the backend, so no CORS proxy and no
+ * cross-origin request is involved. Nothing is mocked.
  *
  * Tests run **serially** (`workers: 1`, `fullyParallel: false`) because they all
- * share one dev database: several of them close the seeded week and generate
+ * share one database: several of them close the seeded week and generate
  * invoices, which are not reversible through the API.
  */
 export default defineConfig({

@@ -1,9 +1,10 @@
 /**
  * Direct API helpers.
  *
- * The browser can only talk to the API through the CORS proxy; these helpers use
- * Playwright's `request` fixture, which talks to the **real** backend on :4400
- * with no CORS involvement. They are used to assert the API contract itself
+ * The browser talks to the API through the frontend's same-origin `/api`
+ * proxy; these helpers use Playwright's `request` fixture, which talks to the
+ * suite's **own** backend on :4410 (bound to the E2E database) directly, with
+ * no CORS involvement. They are used to assert the API contract itself
  * (status codes, error codes, binary payloads) next to the UI assertions.
  */
 import { expect, type APIRequestContext } from '@playwright/test'
@@ -49,23 +50,36 @@ export interface ApiEnvelope<T> {
   error?: { code: string, message: string, details?: unknown }
 }
 
+/**
+ * The payload of an API response.
+ *
+ * The specs annotate their calls either as `ApiEnvelope<T>` or as
+ * `{ data: T }` (the shape they actually read); both must yield `T`.
+ */
+type EnvelopePayload<R> =
+  R extends ApiResult<ApiEnvelope<infer T>> ? T
+    : R extends ApiResult<{ data: infer T }> ? T
+      : unknown
+
 /** Asserts the standard envelope and returns the payload. */
-export function expectEnvelope<T>(result: ApiResult<ApiEnvelope<T>>, status = 200): T {
+export function expectEnvelope<R extends ApiResult<unknown>>(result: R, status = 200): EnvelopePayload<R> {
+  const envelope = result.json as ApiEnvelope<EnvelopePayload<R>>
   expect(result.status, `unexpected status; body=${result.text}`).toBe(status)
-  expect(result.json.success).toBe(true)
-  expect(result.json.data).toBeDefined()
-  return result.json.data as T
+  expect(envelope.success).toBe(true)
+  expect(envelope.data).toBeDefined()
+  return envelope.data as EnvelopePayload<R>
 }
 
 /** Asserts a failure envelope and returns the error code. */
-export function expectError(result: ApiResult<ApiEnvelope<unknown>>, status: number, code?: string): string {
+export function expectError(result: ApiResult<unknown>, status: number, code?: string): string {
+  const envelope = result.json as ApiEnvelope<unknown>
   expect(result.status, `unexpected status; body=${result.text}`).toBe(status)
-  expect(result.json.success).toBe(false)
-  expect(result.json.error).toBeDefined()
+  expect(envelope.success).toBe(false)
+  expect(envelope.error).toBeDefined()
   if (code) {
-    expect(result.json.error!.code, `unexpected error code; body=${result.text}`).toBe(code)
+    expect(envelope.error!.code, `unexpected error code; body=${result.text}`).toBe(code)
   }
-  return result.json.error!.code
+  return envelope.error!.code
 }
 
 export interface WeekTotalsDto {
@@ -105,6 +119,8 @@ export interface InvoiceDto {
   weekId: number
   clientId: number | null
   clientName: string
+  /** The person's name — `null` when the client has no contact name. */
+  contactName: string | null
   contactEmail: string
   ccEmail: string | null
   platformCompany: string | null

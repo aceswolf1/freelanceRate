@@ -1,0 +1,16 @@
+clients|1
+projects|3
+records|11
+invoices|1
+weeks|1
+platforms|1
+afb643b94ee92dfa68111873d75187f1
+
+# Re-baseline 28-10-2026 10:29: previous checksum differed ONLY by weeks id=2 (2026-10-26), auto-created 2026-10-27 14:47:22 when the lead's verification curl rendered :3100/ right after restarting it (14:47:18). Not caused by the e2e suite.
+clients|1
+projects|3
+records|11
+invoices|1
+weeks|2
+platforms|1
+4378cf41edb7f01b74402bedae674ae6

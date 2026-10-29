@@ -1,19 +1,22 @@
 /**
  * Shared paths and ports for the BillFlow E2E suite.
  *
- * IMPORTANT — why the suite does not use the "obvious" ports:
+ * The suite drives a **fully isolated** stack of its own — nothing it touches
+ * is shared with the development environment:
  *
- *  · The API lives on `http://localhost:4400` (started by the team lead).
- *  · The frontend is supposed to live on `http://localhost:3000`, but on this
- *    machine **:3000 is taken by an unrelated app** (a Next.js project), and the
- *    authorization for this task explicitly forbids killing processes we did not
- *    start. So the E2E frontend is started by this suite on **:3300**.
- *  · The API's CORS policy allows exactly one origin (`http://localhost:3000`),
- *    so a browser running on :3300 would be blocked on every cross-origin
- *    request (all mutations and every fetch+blob download). The suite therefore
- *    runs a **tiny CORS-forwarding proxy on :4401** that forwards `/api/*` to the
- *    real backend on :4400 and adds the matching `Access-Control-*` headers.
- *    All real backend logic still runs on the lead's :4400 instance.
+ *  · Database `freelancer_invoices_e2e` (see `helpers/db.ts`) — created,
+ *    migrated and seeded by the suite itself. The development database holds
+ *    the user's real invoices and is never written to.
+ *  · API on `http://127.0.0.1:4410` — started by this suite from the compiled
+ *    backend, bound to the E2E database. The development API keeps running on
+ *    its own port and is never stopped by this suite.
+ *  · Frontend on `http://127.0.0.1:3300` — the production Nuxt build, started
+ *    by this suite with `NUXT_API_INTERNAL_BASE` pointing at the E2E API.
+ *
+ * The browser talks to the **same origin** (`/api` on the frontend), which
+ * Nitro forwards to the backend. There is no CORS proxy any more: the old
+ * forwarder only existed to work around the development API's single-origin
+ * CORS policy, and the same-origin `/api` proxy makes it obsolete.
  *
  * Nothing in this file touches product code.
  */
@@ -54,19 +57,23 @@ export const BACKEND_DIR = resolve(PROJECT_ROOT, 'backend')
 export const FRONTEND_DIR = resolve(PROJECT_ROOT, 'frontend')
 export const E2E_DIR = resolve(PROJECT_ROOT, 'e2e')
 
-/** The lead-owned API (never started or stopped by this suite). */
-export const BACKEND_URL = process.env.E2E_BACKEND_URL ?? 'http://localhost:4400'
+/** Port the suite's own API listens on. */
+export const E2E_BACKEND_PORT = Number(process.env.E2E_BACKEND_PORT ?? 4410)
+/** The suite's own API — started and stopped by this suite. */
+export const BACKEND_URL = `http://127.0.0.1:${E2E_BACKEND_PORT}`
+/** Direct API base used by the `request` fixture in the specs. */
 export const API_BASE = `${BACKEND_URL}/api`
 
-/** Port the E2E frontend listens on (:3000 is occupied by a foreign app). */
+/** Port the suite's own frontend listens on (:3000 is occupied by a foreign app). */
 export const FRONTEND_PORT = Number(process.env.E2E_FRONTEND_PORT ?? 3300)
-export const FRONTEND_URL = `http://localhost:${FRONTEND_PORT}`
-
-/** Port the CORS-forwarding proxy listens on. */
-export const PROXY_PORT = Number(process.env.E2E_PROXY_PORT ?? 4401)
-export const PROXY_URL = `http://localhost:${PROXY_PORT}`
-/** What the browser is told to use as its API base. */
-export const BROWSER_API_BASE = `${PROXY_URL}/api`
+/** The suite's own frontend — the browser's base URL. */
+export const FRONTEND_URL = `http://127.0.0.1:${FRONTEND_PORT}`
+/**
+ * What the browser is told to use as its API base: the **same origin**.
+ * The frontend proxies `/api/*` to the E2E backend, so no CORS policy and no
+ * extra proxy process are involved.
+ */
+export const BROWSER_API_BASE = '/api'
 
 /** Where the 12 design-comparison screenshots are written. */
 export const SCREENSHOT_DIR = resolve(
